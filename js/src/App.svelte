@@ -8,6 +8,10 @@
   import IntroPanel from './educational/IntroPanel.svelte';
   import Sidebar from './educational/Sidebar.svelte';
   import QAAccordion from './educational/QAAccordion.svelte';
+  import DataScatterPlot from './DataScatterPlot.svelte';
+  import DatasetInfoPanel from './DatasetInfoPanel.svelte';
+  import FitComparisonView from './FitComparisonView.svelte';
+  import DataInputPanel from './DataInputPanel.svelte';
   import type { Snapshot, LayoutMode, MetricsData, Glossary, FAQData } from './types';
   import { loadAllContent } from './lib/contentLoader';
   import * as educationalState from './stores/educationalState.svelte';
@@ -172,6 +176,15 @@
       intervalId = null
     }
   }
+
+  // Handle dataset change from DataInputPanel
+  function handleDatasetChange(newSnapshots: Snapshot[]) {
+    snapshots = newSnapshots;
+    currentStep = 0;
+    if (playing) {
+      pause();
+    }
+  }
 </script>
 
 <main>
@@ -227,6 +240,45 @@
       <code>cd js && pnpm dev</code>
     </p>
   {:else if snapshots.length > 0}
+    <div class="data-section">
+      <h2 class="section-title">Training Data & Objective</h2>
+      <p class="section-description">
+        Understand what we're training: fitting a line <strong>y = w*x</strong> to data points.
+        Watch how predictions improve as training progresses.
+      </p>
+
+      <div class="data-layout">
+        <DatasetInfoPanel
+          dataset={snapshot?.point_details || []}
+          currentW={snapshot?.w || 0}
+          initialW={snapshots[0]?.w || 0}
+          targetW={2.0}
+          currentLoss={snapshot?.loss || 0}
+        />
+
+        <DataScatterPlot
+          pointDetails={snapshot?.point_details || []}
+          currentW={snapshot?.w || 0}
+          showResiduals={true}
+        />
+      </div>
+
+      <div class="fit-comparison-wrapper">
+        <FitComparisonView
+          initialSnapshot={snapshots[0]}
+          currentSnapshot={snapshot}
+          finalSnapshot={snapshots[snapshots.length - 1]}
+        />
+      </div>
+
+      <details class="dataset-input-details">
+        <summary class="dataset-input-summary">
+          Change Dataset
+        </summary>
+        <DataInputPanel onDatasetChange={handleDatasetChange} loading={loading} />
+      </details>
+    </div>
+
     <LayoutSelector
       {layoutMode}
       onlayoutChange={handleLayoutChange}
@@ -387,6 +439,72 @@
     border-radius: 2px;
   }
 
+  .data-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .section-title {
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .data-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .fit-comparison-wrapper {
+    margin-top: 1.5rem;
+  }
+
+  .dataset-input-details {
+    margin-top: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .dataset-input-summary {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #334155;
+    list-style: none;
+    user-select: none;
+    transition: all 0.15s ease;
+  }
+
+  .dataset-input-summary:hover {
+    background: #f1f5f9;
+  }
+
+  .dataset-input-summary::marker,
+  .dataset-input-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .dataset-input-summary::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 0.5rem;
+    transition: transform 0.15s ease;
+    color: #3b82f6;
+  }
+
+  details[open] .dataset-input-summary::before {
+    transform: rotate(90deg);
+  }
+
   .pedagogical-section,
   .formula-section {
     margin-top: 3rem;
@@ -439,6 +557,14 @@
     .help-button {
       width: 100%;
       justify-content: center;
+    }
+
+    .data-section {
+      padding: 1rem;
+    }
+
+    .data-layout {
+      grid-template-columns: 1fr;
     }
 
     .formula-grid {

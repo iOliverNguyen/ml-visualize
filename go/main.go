@@ -4,14 +4,28 @@ import (
 	"fmt"
 )
 
-func RunTraining() []Snapshot {
-	// Load dataset
-	data := GetDataset()
+// TrainingConfig holds training hyperparameters
+type TrainingConfig struct {
+	WInit float64 `json:"w_init"`
+	LR    float64 `json:"lr"`
+	Steps int     `json:"steps"`
+}
 
+// DefaultTrainingConfig returns default training parameters
+func DefaultTrainingConfig() TrainingConfig {
+	return TrainingConfig{
+		WInit: 0.0,
+		LR:    0.01,
+		Steps: 100,
+	}
+}
+
+// RunTraining trains a linear model on the given dataset
+func RunTrainingWithDataset(data []DataPoint, config TrainingConfig) []Snapshot {
 	// Training hyperparameters
-	w := 0.0     // Initial parameter
-	lr := 0.01   // Learning rate
-	steps := 100 // Number of training steps
+	w := config.WInit
+	lr := config.LR
+	steps := config.Steps
 
 	// Storage for all training snapshots
 	snapshots := []Snapshot{}
@@ -91,4 +105,11 @@ func RunTraining() []Snapshot {
 	fmt.Printf("Training complete! Final w: %.4f\n", w)
 
 	return snapshots
+}
+
+// RunTraining runs training with default dataset and config (for backward compatibility)
+func RunTraining() []Snapshot {
+	data := GetDataset()
+	config := DefaultTrainingConfig()
+	return RunTrainingWithDataset(data, config)
 }
