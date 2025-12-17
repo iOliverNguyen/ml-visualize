@@ -51,3 +51,36 @@ export interface MetricsData {
     loss: number;
   };
 }
+
+// Educational content types
+export interface GlossaryEntry {
+  term: string;
+  brief: string;
+  detailed: string;
+  comprehensive?: string;
+  level: string[];
+  formula?: string;
+  relatedTerms: string[];
+  example?: string;
+}
+
+export interface Glossary {
+  [key: string]: GlossaryEntry;
+}
+
+export interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+  level: string;
+  tags: string[];
+}
+
+export interface FAQCategory {
+  name: string;
+  questions: FAQItem[];
+}
+
+export interface FAQData {
+  categories: FAQCategory[];
+}

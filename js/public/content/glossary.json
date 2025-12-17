@@ -1,0 +1,82 @@
+{
+  "gradient-descent": {
+    "term": "Gradient Descent",
+    "brief": "An algorithm that finds optimal parameters by taking small steps toward lower loss.",
+    "detailed": "Gradient descent is an optimization algorithm that minimizes a loss function by iteratively computing the gradient (slope) and updating parameters in the opposite direction. At each step: compute predictions → compute loss → compute gradient → update parameters. This repeats until convergence.",
+    "comprehensive": "Gradient descent is the workhorse algorithm behind most machine learning. It solves the optimization problem: find parameters that minimize loss.\n\nThe algorithm:\n1. Start with initial parameter values\n2. Repeat until convergence:\n   a. Compute predictions using current parameters\n   b. Compute loss (how wrong predictions are)\n   c. Compute gradients (how loss changes with parameters)\n   d. Update parameters: w ← w - α·∇L\n\nWhy 'gradient'? The gradient ∇L points toward increasing loss. Moving opposite reduces loss.\n\nWhy 'descent'? We descend the loss landscape toward lower loss, like hiking down a mountain.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "w_{new} = w_{old} - \\alpha \\frac{\\partial L}{\\partial w}",
+    "relatedTerms": ["learning-rate", "gradient", "loss-function", "parameter"],
+    "example": "If gradient is -2.5 and learning rate is 0.01: w_new = w_old - 0.01 × (-2.5) = w_old + 0.025"
+  },
+  "loss-function": {
+    "term": "Loss Function",
+    "brief": "A function that measures how wrong the model's predictions are. Lower loss means better predictions.",
+    "detailed": "The loss function (also called cost or objective function) maps the model's predictions to a single number representing error. During training, the goal is to minimize this number. For regression, we commonly use Mean Squared Error (MSE), which averages the squared differences between predictions and true values.",
+    "comprehensive": "Loss functions translate 'how good is my model?' into a single number we can optimize. Lower loss = better model.\n\nFor scalar regression with MSE:\nL(w) = (1/n) Σ (ŷᵢ - yᵢ)² = (1/n) Σ (w·xᵢ - yᵢ)²\n\nWhy square the error?\n1. Always positive\n2. Penalizes large errors more than small ones\n3. Differentiable (smooth gradient)\n4. Has unique minimum for convex problems\n\nWhy average? Normalizes across different dataset sizes.\n\nThe loss surface for linear regression is a smooth bowl (convex), guaranteeing gradient descent finds the global optimum.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "L = \\frac{1}{n} \\sum_{i=1}^{n} (\\hat{y}_i - y_i)^2",
+    "relatedTerms": ["mean-squared-error", "gradient", "optimization"],
+    "example": "For predictions [1.5, 3.0, 4.5] and true values [2, 4, 5], errors are [-0.5, -1.0, -0.5]. Squared: [0.25, 1.00, 0.25]. MSE = (0.25 + 1.00 + 0.25) / 3 = 0.50"
+  },
+  "gradient": {
+    "term": "Gradient",
+    "brief": "The slope of the loss function. Shows which direction to adjust parameters to reduce loss.",
+    "detailed": "The gradient is the derivative (rate of change) of the loss function with respect to parameters. It indicates which direction increases loss most steeply. For a single parameter w, the gradient ∂L/∂w tells us: if I increase w slightly, how much does loss change? A positive gradient means loss increases with w, so we decrease w. A negative gradient means loss decreases with w, so we increase w.",
+    "comprehensive": "The gradient is the most important concept in deep learning. It tells us how to improve our model.\n\nMathematical definition:\n∂L/∂w = lim[δ→0] (L(w+δ) - L(w)) / δ\n\nFor our MSE loss:\nL(w) = (1/n) Σ (w·xᵢ - yᵢ)²\n\nDerivative (using chain rule):\n∂L/∂w = (2/n) Σ (w·xᵢ - yᵢ) · xᵢ\n       = (2/n) Σ (ŷᵢ - yᵢ) · xᵢ\n\nEach data point contributes: 2 × error × input\n\nKey insight: Gradient points uphill (toward increasing loss). That's why we subtract it: w ← w - α·∂L/∂w. We move downhill to minimize loss.\n\nWhen gradient is zero, we're at a critical point (minimum, maximum, or saddle point). For convex functions, zero gradient guarantees we found the optimal solution.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\frac{\\partial L}{\\partial w} = \\frac{2}{n} \\sum_{i=1}^{n} (\\hat{y}_i - y_i) \\cdot x_i",
+    "relatedTerms": ["gradient-descent", "derivative", "learning-rate"],
+    "example": "If predictions are too high (positive errors), gradient is positive → we should decrease w to reduce predictions."
+  },
+  "learning-rate": {
+    "term": "Learning Rate",
+    "brief": "Controls the step size when updating parameters. Too small is slow, too large causes instability.",
+    "detailed": "Learning rate (α or lr) is the most important hyperparameter in gradient descent. It scales the gradient to determine how much we adjust parameters each step. The update rule is: w_new = w_old - lr × gradient. Typical values range from 0.0001 to 0.1. Too small means slow training. Too large means oscillation or divergence.",
+    "comprehensive": "Learning rate controls the step size in parameter space. It's critical for successful training.\n\nUpdate rule: w_new = w_old - α · ∂L/∂w\n\nThe tradeoff:\n- Too small (α = 0.0001): Tiny steps, guaranteed stability, but takes forever\n- Too large (α = 1.0): Giant leaps, may overshoot and diverge\n- Just right (α = 0.01): Efficient, stable convergence\n\nHow to choose:\n1. Start with 0.01\n2. If loss oscillates or increases → reduce by 10×\n3. If loss decreases very slowly → increase by 3×\n4. Use adaptive methods (Adam) that adjust α automatically\n\nAdvanced techniques:\n- Learning rate schedules: decay over time\n- Warmup: gradually increase at start\n- Adaptive methods: different rate per parameter (Adam, RMSprop)\n\nFor this demo with lr=0.01: each gradient of 1.0 changes w by 0.01.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "w_{new} = w_{old} - \\alpha \\cdot \\frac{\\partial L}{\\partial w}",
+    "relatedTerms": ["gradient-descent", "hyperparameter", "optimization"],
+    "example": "With lr=0.01 and gradient=-2.5: Δw = -0.01 × (-2.5) = 0.025, so w increases by 0.025"
+  },
+  "parameter": {
+    "term": "Parameter",
+    "brief": "A number the model learns from data to make predictions. In this demo: the slope w.",
+    "detailed": "Parameters (also called weights) are the numbers a model learns during training. They're adjusted to minimize loss. In our simple model y = w×x, there's one parameter: w (the slope). Neural networks have millions of parameters. The goal of training is to find parameter values that make good predictions on new data.",
+    "comprehensive": "Parameters are what make machine learning 'learn'. They're the knobs the algorithm turns to fit the data.\n\nIn this demo:\n- Model: y = w × x\n- Parameter: w (slope)\n- Goal: find w that minimizes loss\n\nIn neural networks:\n- Millions of parameters (weights and biases)\n- Each layer has weight matrix W and bias vector b\n- All parameters updated simultaneously via gradient descent\n\nParameters vs Hyperparameters:\n- Parameters: learned from data (w)\n- Hyperparameters: set before training (learning rate, number of steps)\n\nInitialization matters:\n- We start with w = 0 or random\n- Poor initialization can slow convergence\n- For convex problems (like this), initial w doesn't affect final solution, only speed\n\nParameter space:\n- Each parameter is a dimension\n- Training traces a path through this space\n- Gradient descent follows the steepest descent path",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "y = w \\cdot x",
+    "relatedTerms": ["weight", "gradient-descent", "training"],
+    "example": "If w=1.5 and x=2, prediction is ŷ = 1.5 × 2 = 3.0. If true y is 4, we should increase w."
+  },
+  "mean-squared-error": {
+    "term": "Mean Squared Error (MSE)",
+    "brief": "Average of squared differences between predictions and true values. Most common loss for regression.",
+    "detailed": "MSE = (1/n) Σ (ŷ - y)². It computes the squared error for each data point, then averages. Squaring makes all errors positive and penalizes large errors more heavily. MSE is smooth and differentiable, making it ideal for gradient-based optimization. For linear models, MSE loss is convex (bowl-shaped) with a unique global minimum.",
+    "comprehensive": "Mean Squared Error (MSE) is the standard loss function for regression problems.\n\nDefinition:\nL(w) = (1/n) Σᵢ₌₁ⁿ (ŷᵢ - yᵢ)²\n\nBreaking it down:\n- (ŷᵢ - yᵢ): prediction error for point i\n- (...)²: square the error\n- Σ: sum across all points\n- (1/n): average (mean)\n\nWhy square errors?\n1. Always positive: both +5 and -5 errors contribute 25\n2. Penalizes outliers: error of 10 contributes 100 vs 10 for absolute\n3. Smooth gradient: differentiable everywhere\n4. Geometric meaning: sum of squared distances\n\nMSE in context:\n- Values depend on data scale\n- Loss = 1.0 means average squared error is 1.0\n- Root MSE (√MSE) gives error in original units\n- For this demo, good models achieve MSE < 0.1\n\nAlternatives:\n- MAE (Mean Absolute Error): more robust to outliers\n- Huber Loss: combines MSE and MAE\n- For classification: Cross-Entropy",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "MSE = \\frac{1}{n} \\sum_{i=1}^{n} (\\hat{y}_i - y_i)^2",
+    "relatedTerms": ["loss-function", "regression", "squared-error"],
+    "example": "Data: (1,2), (2,4), (3,5). Predictions with w=1.5: [1.5, 3.0, 4.5]. Errors: [-0.5, -1.0, -0.5]. MSE = (0.25 + 1.00 + 0.25)/3 = 0.50"
+  },
+  "convergence": {
+    "term": "Convergence",
+    "brief": "When training reaches a stable point where loss stops decreasing significantly.",
+    "detailed": "Convergence means the algorithm has found a solution where further updates don't improve loss much. Indicators: gradient near zero, loss plateau, parameters stabilize. For convex problems (like this), convergence means finding the global minimum. Stopping criteria: maximum iterations, gradient threshold, or loss threshold reached.",
+    "comprehensive": "Convergence is when training 'settles down' at an optimal (or near-optimal) solution.\n\nMathematical definition:\nlim[t→∞] w_t = w*\n\nIn practice, stop when:\n- ||w_t - w_{t-1}|| < ε (parameter changes are tiny)\n- |L(w_t) - L(w_{t-1})| < ε (loss changes are tiny)\n- ||∂L/∂w|| < ε (gradient is near zero)\n\nTypes of convergence:\n\n1. Global convergence: Found the global minimum\n   - Guaranteed for convex functions (our case)\n   - Gradient descent always converges here\n\n2. Local convergence: Found a local minimum\n   - Common in non-convex problems (neural networks)\n   - Still useful if local minimum is good enough\n\n3. Saddle point: Gradient zero but not a minimum\n   - Not an issue for convex problems\n   - Can slow training in high dimensions\n\nConvergence rate:\n- Linear convergence: error decreases by constant factor each step\n- For strongly convex functions: O(log(1/ε)) steps needed\n- Typical: 100-1000 steps for simple problems\n\nSigns in this visualization:\n- Loss plot flattens (horizontal)\n- Parameter plot stabilizes\n- Gradient arrow shrinks to nearly zero",
+    "level": ["intermediate", "advanced"],
+    "formula": "||w_t - w^*|| \\to 0 \\text{ as } t \\to \\infty",
+    "relatedTerms": ["optimization", "gradient-descent", "stopping-criteria"],
+    "example": "After 50 steps, if gradient is 0.0001 and loss hasn't changed for 10 steps, training has likely converged."
+  },
+  "hyperparameter": {
+    "term": "Hyperparameter",
+    "brief": "A configuration setting chosen before training (not learned from data). Example: learning rate.",
+    "detailed": "Hyperparameters control the learning process but aren't learned themselves. Examples: learning rate, number of training steps, model architecture, initialization method. They're set through experimentation, grid search, or expert knowledge. Contrast with parameters (like w) which are learned automatically from data during training.",
+    "comprehensive": "Hyperparameters are the 'settings' you configure before training begins.\n\nCommon hyperparameters in this demo:\n- Learning rate (α or lr): step size (0.01)\n- Number of steps: how many iterations (100)\n- Initial parameter value: starting w (0.0)\n- Loss function: MSE vs MAE vs other\n\nHyperparameters vs Parameters:\n- Hyperparameters: set by human, control learning\n- Parameters: learned automatically, make predictions\n\nChoosing hyperparameters:\n1. Manual tuning: try different values, pick best\n2. Grid search: test all combinations\n3. Random search: sample randomly, often better\n4. Bayesian optimization: use past trials to guide search\n5. Use defaults: 0.001-0.01 for lr works often\n\nLearning rate is most critical:\n- Too small: slow but safe\n- Too large: fast but unstable\n- Just right: efficient convergence\n\nOther hyperparameters in ML:\n- Neural networks: layer sizes, activation functions, dropout rate\n- Tree models: depth, split criteria\n- Regularization: λ for L1/L2 penalties\n\nIn this demo, you can experiment with:\n- Different learning rates (0.001, 0.01, 0.1)\n- Different initialization (w=0, w=random)\n- Different number of steps",
+    "level": ["beginner", "intermediate"],
+    "formula": "\\alpha, \\text{steps}, w_0",
+    "relatedTerms": ["learning-rate", "optimization", "training"],
+    "example": "Learning rate is a hyperparameter. We set lr=0.01 before training, then it stays fixed. The parameter w starts at 0 and changes to minimize loss."
+  }
+}

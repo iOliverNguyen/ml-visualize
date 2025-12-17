@@ -1,0 +1,202 @@
+{
+  "categories": [
+    {
+      "name": "Getting Started",
+      "questions": [
+        {
+          "id": "what-is-this",
+          "question": "What is this visualization showing?",
+          "answer": "This shows how gradient descent learns to fit a straight line (y = w*x) to data. The algorithm automatically adjusts the parameter w to minimize prediction errors. You're watching machine learning in action - the same principles used in modern AI, but for the simplest possible problem.",
+          "level": "beginner",
+          "tags": ["overview", "introduction"]
+        },
+        {
+          "id": "not-math-person",
+          "question": "I'm not a math person. Can I still understand this?",
+          "answer": "Absolutely! Start by just watching the animations and seeing how the plots change. Hover over any term you don't understand for a simple definition. The visualizations show what's happening even without formulas. You'll build intuition through exploration - understanding follows naturally.",
+          "level": "beginner",
+          "tags": ["encouragement", "getting-started"]
+        },
+        {
+          "id": "what-to-look-at",
+          "question": "What should I look at first?",
+          "answer": "1) Click the play button to watch training from start to finish. 2) Watch the Loss plot - it should go down. 3) Click through the Step Breakdown tabs to see what happens at each step. 4) Hover over anything you're curious about. There's no wrong way to explore!",
+          "level": "beginner",
+          "tags": ["getting-started", "tutorial"]
+        },
+        {
+          "id": "training-goal",
+          "question": "What's the goal of training?",
+          "answer": "Find the value of w that makes predictions ŷ = w*x as close as possible to the true y values. 'Close as possible' means minimizing loss (average squared error). When training succeeds, predictions match reality well, and loss is low.",
+          "level": "beginner",
+          "tags": ["concepts", "goal"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding Loss",
+      "questions": [
+        {
+          "id": "what-is-loss",
+          "question": "What is loss and why does it matter?",
+          "answer": "Loss is a single number measuring how wrong your predictions are. Think of it like a golf score - lower is better. During training, the algorithm tries to minimize this number. When loss is high, predictions are far from true values. When loss is low, predictions are accurate. Loss is THE objective - the number we're trying to minimize.",
+          "level": "beginner",
+          "tags": ["loss", "concepts"]
+        },
+        {
+          "id": "why-squared-error",
+          "question": "Why do we use Mean Squared Error?",
+          "answer": "MSE has nice mathematical properties: (1) Always positive - both +5 and -5 errors contribute 25, (2) Penalizes outliers - error of 10 contributes 100 vs 10 for absolute error, (3) Smooth gradient everywhere - makes optimization easier, (4) Has unique minimum for linear models. It's the standard choice for regression.",
+          "level": "intermediate",
+          "tags": ["loss", "math"]
+        },
+        {
+          "id": "good-loss-value",
+          "question": "What's a 'good' loss value?",
+          "answer": "It depends on your data scale. For this demo with y values around 0-10, loss < 0.1 is excellent, 0.1-1.0 is good, > 5.0 means poor fit. What matters most is that loss decreases during training and eventually plateaus (stops changing). Comparing initial vs final loss shows improvement.",
+          "level": "beginner",
+          "tags": ["loss", "metrics"]
+        },
+        {
+          "id": "loss-increase",
+          "question": "Can loss increase during training?",
+          "answer": "In healthy training, loss should only decrease. If loss increases, something is wrong: (1) Learning rate is too large (causing divergence), (2) There's a bug in the code, (3) Using stochastic methods (small fluctuations are normal). For batch gradient descent like this demo, loss must decrease every step.",
+          "level": "intermediate",
+          "tags": ["loss", "troubleshooting"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding Gradients",
+      "questions": [
+        {
+          "id": "gradient-simple",
+          "question": "What is a gradient in simple terms?",
+          "answer": "The gradient is like a compass that points you toward higher loss. It tells you which direction to adjust w to increase loss. Since we want to decrease loss, we move in the opposite direction. Think of it as: 'If I change w this way, loss gets worse, so I should change w the other way instead.'",
+          "level": "beginner",
+          "tags": ["gradient", "concepts"]
+        },
+        {
+          "id": "gradient-uphill",
+          "question": "Why does gradient point uphill if we want to go downhill?",
+          "answer": "By mathematical definition, the gradient ∂L/∂w points in the direction where loss increases (uphill). That's why the update rule subtracts the gradient: w_new = w_old - α·∂L/∂w. The minus sign makes us move opposite to the gradient, which is downhill. If gradient is +2, we decrease w. If gradient is -2, we increase w.",
+          "level": "intermediate",
+          "tags": ["gradient", "math"]
+        },
+        {
+          "id": "zero-gradient",
+          "question": "What does it mean when gradient is zero?",
+          "answer": "Gradient zero means we're at a flat point where loss doesn't change (locally) regardless of small adjustments to w. For convex problems like this linear model, zero gradient means we found the optimal w - the global minimum. For neural networks (non-convex), could be a local minimum, maximum, or saddle point.",
+          "level": "intermediate",
+          "tags": ["gradient", "convergence"]
+        },
+        {
+          "id": "gradient-calculation",
+          "question": "How is the gradient calculated?",
+          "answer": "Using calculus (chain rule). For L = (1/n)Σ(w*x - y)², we derive ∂L/∂w = (2/n)Σ(w*x - y)*x. This means: each data point contributes (2 × error × input) to the gradient. We average across all points to get the final gradient. Modern frameworks (PyTorch, TensorFlow) compute this automatically via backpropagation.",
+          "level": "advanced",
+          "tags": ["gradient", "math", "calculus"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding Updates",
+      "questions": [
+        {
+          "id": "learning-rate",
+          "question": "What is learning rate and why does it matter?",
+          "answer": "Learning rate (α or lr) controls how big our steps are when updating w. It's the most important hyperparameter. Too small (0.0001): training is slow but safe. Too large (1.0): training might diverge (loss increases). Just right (0.01): efficient, stable convergence. It's a Goldilocks problem - not too hot, not too cold, but just right.",
+          "level": "beginner",
+          "tags": ["learning-rate", "hyperparameters"]
+        },
+        {
+          "id": "choose-learning-rate",
+          "question": "How do I choose a good learning rate?",
+          "answer": "Start with 0.01 (a good default). Watch the loss plot: (1) If loss oscillates wildly or increases → reduce by 10×, (2) If loss decreases very slowly → increase by 3×, (3) If loss decreases smoothly → you found a good value. In practice, try a few values and pick the one with fastest smooth convergence. Advanced: use learning rate schedules or adaptive optimizers (Adam).",
+          "level": "intermediate",
+          "tags": ["learning-rate", "tuning"]
+        },
+        {
+          "id": "lr-too-large",
+          "question": "What happens if learning rate is too large?",
+          "answer": "Steps become too big, causing overshooting. You jump over the minimum instead of landing in it. Loss oscillates wildly or increases (divergence). In the visualization, you'd see w bouncing back and forth, and the loss plot going up instead of down. Solution: reduce learning rate by 10x and restart training.",
+          "level": "beginner",
+          "tags": ["learning-rate", "troubleshooting"]
+        },
+        {
+          "id": "step-vs-epoch",
+          "question": "What's the difference between one step and one epoch?",
+          "answer": "One step (iteration) = one parameter update. One epoch = one pass through the entire dataset. For batch gradient descent (what we're doing), one step = one epoch since we use all data each time. For mini-batch gradient descent, one epoch contains multiple steps (one per mini-batch). For stochastic GD, one epoch = N steps where N is dataset size.",
+          "level": "intermediate",
+          "tags": ["training", "terminology"]
+        }
+      ]
+    },
+    {
+      "name": "Advanced Topics",
+      "questions": [
+        {
+          "id": "nonlinear-data",
+          "question": "What if my data is nonlinear?",
+          "answer": "Linear models (y = w*x) can't fit curves. Solutions: (1) Feature engineering - add polynomial features (x², x³), (2) Use nonlinear models like neural networks with activation functions, (3) Use kernel methods (SVM). The learning algorithm (gradient descent) stays the same, but the model becomes more complex.",
+          "level": "advanced",
+          "tags": ["extensions", "theory"]
+        },
+        {
+          "id": "extend-to-neural-nets",
+          "question": "How does this extend to neural networks?",
+          "answer": "Neural networks have millions of parameters instead of one, multiple layers with nonlinear activations, and more complex architectures. But the learning algorithm is identical: compute loss → compute gradients (via backpropagation) → update all parameters. Same concepts at massive scale. The gradient descent math we're learning here applies directly to modern deep learning.",
+          "level": "advanced",
+          "tags": ["extensions", "neural-networks"]
+        },
+        {
+          "id": "multiple-parameters",
+          "question": "What about multiple parameters?",
+          "answer": "With multiple parameters, gradient becomes a vector [∂L/∂w₁, ∂L/∂w₂, ...]. We update each independently: w_i ← w_i - lr*∂L/∂w_i. Everything else is the same. Neural networks have millions of parameters, all updated simultaneously each step. The loss landscape becomes multi-dimensional, but gradient descent still finds the way down.",
+          "level": "advanced",
+          "tags": ["extensions", "math"]
+        },
+        {
+          "id": "gd-failure-modes",
+          "question": "When does gradient descent fail?",
+          "answer": "Common failure modes: (1) Learning rate too large → divergence, (2) Poor initialization → slow convergence, (3) Non-convex functions → stuck in local minima (though this often isn't a problem in practice), (4) Saddle points → gradient near zero but not at minimum, (5) Vanishing/exploding gradients in deep networks. Solutions vary: adjust learning rate, try different initialization, use momentum, use adaptive optimizers.",
+          "level": "advanced",
+          "tags": ["troubleshooting", "theory"]
+        }
+      ]
+    },
+    {
+      "name": "Troubleshooting",
+      "questions": [
+        {
+          "id": "loss-not-decreasing",
+          "question": "Why isn't my loss decreasing?",
+          "answer": "Check: (1) Learning rate - if too small, increase it by 3×, (2) Already converged - check if gradient is near zero, (3) Bug in gradient calculation - verify the math, (4) Wrong update direction - should subtract gradient, not add. For this demo with correct code, if loss isn't decreasing, learning rate is probably too small.",
+          "level": "beginner",
+          "tags": ["troubleshooting", "debugging"]
+        },
+        {
+          "id": "loss-nan",
+          "question": "Why is my loss NaN or infinity?",
+          "answer": "Numerical overflow from exploding values. Usually caused by learning rate too large, making parameters explode. Solutions: (1) Reduce learning rate by 100×, (2) Check for bugs (division by zero, log of negative), (3) Normalize input data to reasonable scale. If you see NaN, something went very wrong - start debugging.",
+          "level": "intermediate",
+          "tags": ["troubleshooting", "debugging"]
+        },
+        {
+          "id": "stuck-at-high-loss",
+          "question": "Training seems stuck at a high loss value.",
+          "answer": "Possible causes: (1) Model can't fit the data - need more complex model or better features, (2) Learning rate too small - increase it, (3) Stuck in local minimum (for non-convex) - try different initialization, (4) Vanishing gradients - check gradient magnitudes. For linear regression, this shouldn't happen - convex problems always converge to global minimum.",
+          "level": "intermediate",
+          "tags": ["troubleshooting", "convergence"]
+        },
+        {
+          "id": "parameters-oscillating",
+          "question": "Parameters are oscillating, not converging.",
+          "answer": "Learning rate is too large. Parameters overshoot the minimum and bounce back and forth. You'll see w jumping around the optimal value, and loss might oscillate too. Solution: reduce learning rate by 10× and restart. Alternatively, add momentum to smooth out the oscillations, or use an adaptive optimizer (Adam) that adjusts learning rate automatically.",
+          "level": "beginner",
+          "tags": ["troubleshooting", "learning-rate"]
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,12 @@
   import LayoutSelector from './LayoutSelector.svelte';
   import StepBreakdown from './StepBreakdown.svelte';
   import FormulaOverlay from './FormulaOverlay.svelte';
-  import type { Snapshot, LayoutMode, MetricsData } from './types';
+  import IntroPanel from './educational/IntroPanel.svelte';
+  import Sidebar from './educational/Sidebar.svelte';
+  import QAAccordion from './educational/QAAccordion.svelte';
+  import type { Snapshot, LayoutMode, MetricsData, Glossary, FAQData } from './types';
+  import { loadAllContent } from './lib/contentLoader';
+  import * as educationalState from './stores/educationalState.svelte';
 
   let snapshots = $state<Snapshot[]>([]);
   let currentStep = $state(0);
@@ -13,6 +18,11 @@
   let intervalId = $state<number | null>(null);
   let loading = $state(true);
   let error = $state('');
+
+  // Educational content
+  let glossary = $state<Glossary>({});
+  let faqs = $state<FAQData>({ categories: [] });
+  let contentLoading = $state(true);
 
   // Layout mode with localStorage persistence
   let layoutMode = $state<LayoutMode>(
@@ -90,6 +100,22 @@
     loadSnapshots();
   })
 
+  // Load educational content on mount
+  $effect(() => {
+    async function loadContent() {
+      try {
+        const content = await loadAllContent();
+        glossary = content.glossary;
+        faqs = content.faqs;
+        contentLoading = false;
+      } catch (e) {
+        console.error('Failed to load educational content:', e);
+        contentLoading = false;
+      }
+    }
+    loadContent();
+  })
+
   function stepForward() {
     if (currentStep < snapshots.length - 1) {
       currentStep++
@@ -149,7 +175,42 @@
 </script>
 
 <main>
-  <h1>Scalar Gradient Descent: y = w*x</h1>
+  <div class="header">
+    <h1>Scalar Gradient Descent: y = w*x</h1>
+    <div class="header-buttons">
+      {#if !educationalState.state.showIntroPanel}
+        <button
+          class="intro-button"
+          onclick={() => {
+            educationalState.state.showIntroPanel = true;
+            educationalState.saveToLocalStorage();
+          }}
+          aria-label="Show introduction panel"
+          type="button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Welcome
+        </button>
+      {/if}
+      <button
+        class="help-button"
+        onclick={() => educationalState.toggleSidebar()}
+        aria-label="Toggle help sidebar"
+        type="button"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Help
+      </button>
+    </div>
+  </div>
+
+  <IntroPanel />
 
   {#if loading}
     <p class="message">Loading snapshots...</p>
@@ -214,14 +275,86 @@
   {/if}
 </main>
 
+{#if !contentLoading}
+  <Sidebar {glossary} {faqs} />
+{/if}
+
 <style>
   main {
     padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
   }
 
   h1 {
-    margin-bottom: 2rem;
+    margin: 0;
     color: #1a1a1a;
+  }
+
+  .header-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .intro-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.15s ease;
+  }
+
+  .intro-button:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .intro-button:focus {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+  }
+
+  .help-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.15s ease;
+  }
+
+  .help-button:hover {
+    background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .help-button:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
   }
 
   .message {
@@ -284,6 +417,30 @@
   }
 
   @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    .header-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .intro-button,
+    .help-button {
+      width: 100%;
+      justify-content: center;
+    }
+
     .formula-grid {
       grid-template-columns: 1fr;
     }
