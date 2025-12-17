@@ -3,6 +3,8 @@
   import Plots from './Plots.svelte';
   import MetricsPanel from './MetricsPanel.svelte';
   import LayoutSelector from './LayoutSelector.svelte';
+  import StepBreakdown from './StepBreakdown.svelte';
+  import FormulaOverlay from './FormulaOverlay.svelte';
   import type { Snapshot, LayoutMode, MetricsData } from './types';
 
   let snapshots = $state<Snapshot[]>([]);
@@ -187,7 +189,28 @@
       {snapshots}
       {currentStep}
       {layoutMode}
+      onStepClick={setStep}
     />
+
+    <div class="pedagogical-section">
+      <h2>Step-by-Step Breakdown</h2>
+      <p class="section-description">
+        Explore what happens at each training step: forward pass, loss computation, gradient calculation, and parameter update.
+      </p>
+      <StepBreakdown snapshot={snapshot} />
+    </div>
+
+    <div class="formula-section">
+      <h2>Interactive Formulas</h2>
+      <p class="section-description">
+        See the math behind gradient descent with live values from the current step.
+      </p>
+      <div class="formula-grid">
+        <FormulaOverlay snapshot={snapshot} mode="loss" />
+        <FormulaOverlay snapshot={snapshot} mode="gradient" />
+        <FormulaOverlay snapshot={snapshot} mode="update" />
+      </div>
+    </div>
   {/if}
 </main>
 
@@ -229,5 +252,40 @@
     background: #e0e0e0;
     padding: 0.2rem 0.4rem;
     border-radius: 2px;
+  }
+
+  .pedagogical-section,
+  .formula-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .pedagogical-section h2,
+  .formula-section h2 {
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+    font-size: 1.5rem;
+  }
+
+  .section-description {
+    margin: 0 0 1.5rem 0;
+    color: #64748b;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .formula-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

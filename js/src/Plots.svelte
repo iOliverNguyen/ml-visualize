@@ -8,9 +8,10 @@
     snapshots: Snapshot[];
     currentStep: number;
     layoutMode: LayoutMode;
+    onStepClick?: (step: number) => void;
   }
 
-  let { snapshots, currentStep, layoutMode }: Props = $props();
+  let { snapshots, currentStep, layoutMode, onStepClick }: Props = $props();
 
   let layoutClass = $derived(`layout-${layoutMode}`);
 </script>
@@ -18,12 +19,12 @@
 <div class="plots {layoutClass}">
   <div class="plot">
     <h2>Loss over Time</h2>
-    <LossPlot {snapshots} {currentStep} />
+    <LossPlot {snapshots} {currentStep} {onStepClick} />
   </div>
 
   <div class="plot">
     <h2>Parameter w over Time</h2>
-    <ParamPlot {snapshots} {currentStep} />
+    <ParamPlot {snapshots} {currentStep} {onStepClick} />
   </div>
 
   <div class="plot">

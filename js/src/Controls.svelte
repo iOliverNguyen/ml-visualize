@@ -24,15 +24,81 @@
   }: Props = $props();
 
   function handleSliderInput(e: Event) {
-    const target = e.target as HTMLInputElement
-    onsliderChange(parseInt(target.value))
+    const target = e.target as HTMLInputElement;
+    onsliderChange(parseInt(target.value));
   }
+
+  let showInfo = $state(false);
+
+  // Detect if user is on Mac
+  const isMac = typeof navigator !== 'undefined' &&
+    (navigator.platform.toUpperCase().indexOf('MAC') >= 0 ||
+     navigator.userAgent.toUpperCase().indexOf('MAC') >= 0);
+
+  function handleKeydown(e: KeyboardEvent) {
+    // Prevent default only for our shortcuts
+    switch(e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (e.metaKey) {
+          // CMD+Left: Jump to start
+          onreset();
+        } else if (e.altKey) {
+          // ALT+Left: Step back 5
+          const targetStep = Math.max(0, currentStep - 5);
+          onsliderChange(targetStep);
+        } else {
+          // Left: Step backward
+          if (currentStep > 0) onstepBack();
+        }
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        if (e.metaKey) {
+          // CMD+Right: Jump to end
+          onjumpToFinal();
+        } else if (e.altKey) {
+          // ALT+Right: Step forward 5
+          const targetStep = Math.min(totalSteps - 1, currentStep + 5);
+          onsliderChange(targetStep);
+        } else {
+          // Right: Step forward
+          if (currentStep < totalSteps - 1) onstepForward();
+        }
+        break;
+      case ' ':
+        e.preventDefault();
+        onplayPause();
+        break;
+      case 'Home':
+        e.preventDefault();
+        onreset();
+        break;
+      case 'End':
+        e.preventDefault();
+        onjumpToFinal();
+        break;
+    }
+  }
+
+  function toggleInfo() {
+    showInfo = !showInfo;
+  }
+
+  // Add event listener on mount, cleanup on unmount
+  $effect(() => {
+    window.addEventListener('keydown', handleKeydown);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  });
 </script>
 
 <div class="controls">
   <div class="button-row">
     <button
       onclick={onreset}
+      disabled={currentStep === 0}
       title="Reset to first step"
       class="reset-btn"
     >
@@ -89,7 +155,43 @@
     <span class="step-display">
       Step: {currentStep} / {totalSteps - 1}
     </span>
+
+    <button
+      onclick={toggleInfo}
+      title="Show keyboard shortcuts"
+      class="info-btn"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="8" y="12" text-anchor="middle" font-size="11" font-weight="bold">i</text>
+      </svg>
+    </button>
   </div>
+
+  {#if showInfo}
+    <div class="info-panel">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="shortcuts">
+        <div class="shortcut">
+          <kbd>← / →</kbd>
+          <span>Step backward / forward</span>
+        </div>
+        <div class="shortcut">
+          <kbd>Alt + ← / →</kbd>
+          <span>Step 5 steps backward / forward</span>
+        </div>
+        <div class="shortcut">
+          <kbd>Space</kbd>
+          <span>Play / Pause</span>
+        </div>
+        <div class="shortcut">
+          <kbd>{isMac ? 'Cmd + ← / →' : 'Home / End'}</kbd>
+          <span>Reset to start / Jump to final</span>
+        </div>
+      </div>
+      <p class="hint">Click the (i) button again to hide this panel</p>
+    </div>
+  {/if}
 
   <div class="slider-row">
     <input
@@ -161,21 +263,81 @@
     cursor: not-allowed;
   }
 
-  .reset-btn {
-    background: #fff5f5;
-    border-color: #fed7d7;
-    color: #c53030;
-  }
-
-  .reset-btn:hover:not(:disabled) {
-    background: #fed7d7;
-  }
-
   .step-display {
     margin-left: auto;
     font-weight: bold;
     font-family: monospace;
     font-size: 1.1rem;
+  }
+
+  .info-btn {
+    padding: 0.4rem 0.6rem;
+    margin-left: 0.5rem;
+    background: #e3f2fd;
+    border-color: #90caf9;
+    color: #1976d2;
+  }
+
+  .info-btn:hover:not(:disabled) {
+    background: #bbdefb;
+  }
+
+  .info-panel {
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .info-panel h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: #2e7d32;
+  }
+
+  .shortcuts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem 1.5rem;
+  }
+
+  .shortcut {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .shortcut kbd {
+    min-width: 100px;
+    padding: 0.25rem 0.5rem;
+    background: white;
+    border: 1px solid #c5e1a5;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .shortcut span {
+    color: #1b5e20;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .shortcuts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .info-panel .hint {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.85rem;
+    color: #558b2f;
+    font-style: italic;
   }
 
   .timeline-slider {

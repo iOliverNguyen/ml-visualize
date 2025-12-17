@@ -26,6 +26,7 @@ func RunTraining() []Snapshot {
 	for step := 0; step < steps; step++ {
 		totalLoss := 0.0
 		totalGrad := 0.0
+		pointDetails := make([]PointSnapshot, 0, len(data))
 
 		// Process each data point
 		for _, point := range data {
@@ -33,18 +34,31 @@ func RunTraining() []Snapshot {
 			yPred := Forward(w, point.X)
 
 			// Compute loss
-			loss := Loss(yPred, point.YTrue)
+			pointLoss := Loss(yPred, point.YTrue)
 
 			// Compute gradient
-			grad := GradW(w, point.X, point.YTrue)
+			pointGrad := GradW(w, point.X, point.YTrue)
 
-			totalLoss += loss
-			totalGrad += grad
+			// Store per-point details for pedagogical inspection
+			pointDetails = append(pointDetails, PointSnapshot{
+				X:         point.X,
+				YTrue:     point.YTrue,
+				YPred:     yPred,
+				PointLoss: pointLoss,
+				PointGrad: pointGrad,
+			})
+
+			totalLoss += pointLoss
+			totalGrad += pointGrad
 		}
 
 		// Average over dataset
 		avgLoss := totalLoss / float64(len(data))
 		avgGrad := totalGrad / float64(len(data))
+
+		// Compute w_new before creating snapshot
+		deltaW := -lr * avgGrad
+		wNew := w + deltaW
 
 		// Create snapshot BEFORE parameter update
 		// This captures the state that produced this gradient
@@ -53,6 +67,14 @@ func RunTraining() []Snapshot {
 			W:     w,
 			GradW: avgGrad,
 			Loss:  avgLoss,
+			PointDetails: pointDetails,
+			UpdateComponents: UpdateDetails{
+				WOld:   w,
+				LR:     lr,
+				GradW:  avgGrad,
+				DeltaW: deltaW,
+				WNew:   wNew,
+			},
 		})
 
 		// Print progress every 20 steps
@@ -62,8 +84,7 @@ func RunTraining() []Snapshot {
 		}
 
 		// Update parameter using gradient descent
-		// w_new = w_old - learning_rate * gradient
-		w = w - lr*avgGrad
+		w = wNew
 	}
 
 	fmt.Println()

@@ -6,9 +6,13 @@
   interface Props {
     snapshots: Snapshot[]
     currentStep: number
+    onStepClick?: (step: number) => void
   }
 
-  let { snapshots, currentStep }: Props = $props()
+  let { snapshots, currentStep, onStepClick }: Props = $props()
+
+  // Hover state
+  let hoveredStep = $state<number | null>(null)
 
   // Dimensions and padding
   const width = 800
@@ -58,13 +62,58 @@
     stroke-width="2"
   />
 
-  <!-- Animated current step marker -->
-  <circle
-    cx={$markerX}
-    cy={$markerY}
-    r="6"
-    fill="#dc2626"
-  />
+  <!-- Interactive data point circles -->
+  {#each snapshots as snapshot, i}
+    <circle
+      cx={scaleX(i)}
+      cy={scaleY(snapshot.w)}
+      r={i === currentStep ? 6 : hoveredStep === i ? 5 : 3}
+      fill={i === currentStep ? '#dc2626' : hoveredStep === i ? '#22c55e' : '#94a3b8'}
+      class="data-point"
+      onmouseenter={() => (hoveredStep = i)}
+      onmouseleave={() => (hoveredStep = null)}
+      onclick={() => onStepClick?.(i)}
+    />
+  {/each}
+
+  <!-- Hover tooltip -->
+  {#if hoveredStep !== null}
+    {@const x = scaleX(hoveredStep)}
+    {@const y = scaleY(snapshots[hoveredStep].w)}
+    {@const tooltipX = x > width - 150 ? x - 140 : x + 10}
+    {@const tooltipY = y > height - 60 ? y - 60 : y + 10}
+
+    <g class="tooltip">
+      <rect
+        x={tooltipX}
+        y={tooltipY}
+        width="130"
+        height="50"
+        fill="white"
+        stroke="#cbd5e1"
+        stroke-width="1"
+        rx="4"
+      />
+      <text
+        x={tooltipX + 10}
+        y={tooltipY + 20}
+        font-size="12"
+        fill="#475569"
+        font-weight="600"
+      >
+        Step {hoveredStep}
+      </text>
+      <text
+        x={tooltipX + 10}
+        y={tooltipY + 38}
+        font-size="11"
+        fill="#64748b"
+        font-family="monospace"
+      >
+        w: {snapshots[hoveredStep].w.toFixed(4)}
+      </text>
+    </g>
+  {/if}
 
   <!-- Axes labels -->
   <text
@@ -109,5 +158,18 @@
     max-height: 400px;
     width: 100%;
     display: block;
+  }
+
+  .data-point {
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .data-point:hover {
+    filter: brightness(1.2);
+  }
+
+  .tooltip {
+    pointer-events: none;
   }
 </style>
