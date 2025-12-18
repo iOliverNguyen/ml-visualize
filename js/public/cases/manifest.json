@@ -1,0 +1,205 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "perfect-start",
+      "name": "Perfect Start",
+      "description": "Clean data, good learning rate, ideal initialization. Everything goes smoothly!",
+      "emoji": "✓",
+      "category": "foundational",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": 0,
+        "lr": 0.001,
+        "steps": 100
+      },
+      "insights": [
+        "Loss decreases smoothly every step",
+        "Line quickly moves toward the data points",
+        "Final w ≈ 2.0 matches the true slope"
+      ]
+    },
+    {
+      "id": "noisy-but-ok",
+      "name": "Noisy But OK",
+      "description": "Moderate noise in the data. Training still works, but loss won't reach zero.",
+      "emoji": "✓",
+      "category": "foundational",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.5,
+        "seed": 123
+      },
+      "training_config": {
+        "w_init": 0,
+        "lr": 0.001,
+        "steps": 100
+      },
+      "insights": [
+        "Loss decreases but stabilizes above zero",
+        "Noise prevents perfect fit",
+        "This is normal in real-world data"
+      ]
+    },
+    {
+      "id": "very-noisy",
+      "name": "Very Noisy",
+      "description": "High noise makes training harder. Loss decreases slowly and stays high.",
+      "emoji": "⚠",
+      "category": "foundational",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 2,
+        "seed": 456
+      },
+      "training_config": {
+        "w_init": 0,
+        "lr": 0.001,
+        "steps": 100
+      },
+      "insights": [
+        "Loss decreases but remains high",
+        "Line struggles to find pattern in noisy data",
+        "May need more data or different model"
+      ]
+    },
+    {
+      "id": "lr-too-slow",
+      "name": "Learning Too Slow",
+      "description": "Learning rate is too small. Training barely moves!",
+      "emoji": "😴",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": 0,
+        "lr": 0.00001,
+        "steps": 200
+      },
+      "insights": [
+        "Barely moving after 200 steps",
+        "Loss decreases extremely slowly",
+        "Would need thousands of steps to converge"
+      ]
+    },
+    {
+      "id": "lr-just-right",
+      "name": "Learning Just Right",
+      "description": "Perfect learning rate. Fast convergence without overshooting.",
+      "emoji": "✓",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": 0.5,
+        "lr": 0.002,
+        "steps": 100
+      },
+      "insights": [
+        "Converges in ~50 steps",
+        "Smooth, steady improvement",
+        "This is what good training looks like"
+      ]
+    },
+    {
+      "id": "lr-too-fast",
+      "name": "Learning Too Fast",
+      "description": "Learning rate is too large. Watch the line bounce around!",
+      "emoji": "⚠",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": 0.8,
+        "lr": 0.008,
+        "steps": 100
+      },
+      "insights": [
+        "Converges quickly but overshoots",
+        "Shows bouncing behavior in first steps",
+        "Eventually stabilizes but less smoothly"
+      ]
+    },
+    {
+      "id": "start-at-zero",
+      "name": "Start at Zero",
+      "description": "Initialize w=0. Line starts completely flat.",
+      "emoji": "✓",
+      "category": "initialization",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": 0,
+        "lr": 0.001,
+        "steps": 100
+      },
+      "insights": [
+        "Starts with flat line (w=0)",
+        "Gradually tilts upward toward data",
+        "Common initialization choice"
+      ]
+    },
+    {
+      "id": "start-far-away",
+      "name": "Start Far Away",
+      "description": "Initialize w=-3. Line starts pointing the wrong direction!",
+      "emoji": "⚠",
+      "category": "initialization",
+      "data_config": {
+        "num_points": 10,
+        "x_min": 1,
+        "x_max": 10,
+        "true_slope": 2,
+        "noise_level": 0.1,
+        "seed": 42
+      },
+      "training_config": {
+        "w_init": -3,
+        "lr": 0.001,
+        "steps": 150
+      },
+      "insights": [
+        "Starts with negative slope",
+        "Takes longer to reach target",
+        "Bad initialization wastes training time"
+      ]
+    }
+  ]
+}

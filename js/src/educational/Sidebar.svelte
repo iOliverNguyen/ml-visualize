@@ -1,28 +1,35 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
-  import type { Glossary, FAQData } from '../types';
+  import type { Glossary, FAQData, TutorialContent } from '../types';
   import * as educationalState from '../stores/educationalState.svelte';
   import GlossaryTooltip from './GlossaryTooltip.svelte';
   import QAAccordion from './QAAccordion.svelte';
+  import TutorialArticle from './TutorialArticle.svelte';
 
   interface Props {
     glossary: Glossary;
     faqs: FAQData;
+    tutorial: TutorialContent;
   }
 
-  let { glossary, faqs }: Props = $props();
+  let { glossary, faqs, tutorial }: Props = $props();
 
-  let activeTab = $state<'glossary' | 'faq'>('glossary');
+  let activeTab = $state<'tutorial' | 'glossary' | 'faq'>('tutorial');
   let searchQuery = $state('');
+  let tocOpen = $state(false);
 
   function handleClose() {
     educationalState.toggleSidebar();
   }
 
-  function switchTab(tab: 'glossary' | 'faq') {
+  function switchTab(tab: 'tutorial' | 'glossary' | 'faq') {
     activeTab = tab;
     searchQuery = '';
+  }
+
+  function toggleTOC() {
+    tocOpen = !tocOpen;
   }
 
   function handleGlossaryTermClick(termId: string) {
@@ -59,10 +66,21 @@
     class="sidebar"
     class:left={educationalState.state.sidebarPosition === 'left'}
     class:right={educationalState.state.sidebarPosition === 'right'}
-    transition:slide={{ duration: 300, easing: cubicOut, axis: 'x' }}
   >
     <div class="sidebar-header">
       <h2 class="sidebar-title">Help & Reference</h2>
+
+      {#if activeTab === 'tutorial'}
+        <button
+          class="toc-button"
+          onclick={toggleTOC}
+          aria-label={tocOpen ? 'Show tutorial content' : 'Show table of contents'}
+          type="button"
+        >
+          {tocOpen ? '📄 Tutorial' : '📖 Contents'}
+        </button>
+      {/if}
+
       <button
         class="close-button"
         onclick={handleClose}
@@ -83,6 +101,14 @@
     <div class="tabs">
       <button
         class="tab"
+        class:active={activeTab === 'tutorial'}
+        onclick={() => switchTab('tutorial')}
+        type="button"
+      >
+        📚 Tutorial
+      </button>
+      <button
+        class="tab"
         class:active={activeTab === 'glossary'}
         onclick={() => switchTab('glossary')}
         type="button"
@@ -99,38 +125,42 @@
       </button>
     </div>
 
-    <div class="search-box">
-      <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="2"/>
-        <path d="M11 11L14 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <input
-        type="text"
-        class="search-input"
-        placeholder={activeTab === 'glossary' ? 'Search terms...' : 'Search questions...'}
-        bind:value={searchQuery}
-      />
-      {#if searchQuery}
-        <button
-          class="clear-search"
-          onclick={() => searchQuery = ''}
-          aria-label="Clear search"
-          type="button"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M10 4L4 10M4 4L10 10"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      {/if}
-    </div>
+    {#if activeTab !== 'tutorial'}
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="2"/>
+          <path d="M11 11L14 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder={activeTab === 'glossary' ? 'Search terms...' : 'Search questions...'}
+          bind:value={searchQuery}
+        />
+        {#if searchQuery}
+          <button
+            class="clear-search"
+            onclick={() => searchQuery = ''}
+            aria-label="Clear search"
+            type="button"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path
+                d="M10 4L4 10M4 4L10 10"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        {/if}
+      </div>
+    {/if}
 
-    <div class="sidebar-content">
-      {#if activeTab === 'glossary'}
+    <div class="sidebar-content" class:tutorial={activeTab === 'tutorial'}>
+      {#if activeTab === 'tutorial'}
+        <TutorialArticle {tutorial} {tocOpen} {toggleTOC} />
+      {:else if activeTab === 'glossary'}
         <div class="glossary-list">
           {#if filteredGlossaryTerms().length === 0}
             <div class="empty-state">
@@ -158,43 +188,32 @@
         />
       {/if}
     </div>
-
-    <div class="sidebar-footer">
-      <div class="level-indicator">
-        <span class="level-label">Current Level:</span>
-        <span class="level-badge" data-level={educationalState.state.userLevel}>
-          {educationalState.state.userLevel}
-        </span>
-      </div>
-    </div>
   </aside>
 {/if}
 
 <style>
   .sidebar {
     position: fixed;
+    right: 0;
     top: 0;
-    bottom: 0;
     width: 550px;
     max-width: 90vw;
+    height: 100vh;
     background: white;
     border-left: 1px solid #e2e8f0;
-    box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 100;
   }
 
   .sidebar.left {
-    left: 0;
     border-left: none;
     border-right: 1px solid #e2e8f0;
-    box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1);
   }
 
   .sidebar.right {
-    right: 0;
+    /* Right positioning handled by parent layout */
   }
 
   .sidebar-header {
@@ -204,6 +223,7 @@
     padding: 1.25rem;
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
+    gap: 0.75rem;
   }
 
   .sidebar-title {
@@ -235,6 +255,32 @@
 
   .close-button:focus {
     outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
+  .toc-button {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: #667eea;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    margin-left: auto;
+    margin-right: 0.5rem;
+  }
+
+  .toc-button:hover {
+    background: #5568d3;
+  }
+
+  .toc-button:focus {
+    outline: 2px solid #667eea;
     outline-offset: 2px;
   }
 
@@ -342,6 +388,10 @@
     padding: 1rem;
   }
 
+  .sidebar-content.tutorial {
+    padding: 0;
+  }
+
   .glossary-list {
     display: flex;
     flex-direction: column;
@@ -376,50 +426,6 @@
 
   .empty-state p {
     margin: 0;
-  }
-
-  .sidebar-footer {
-    padding: 1rem;
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
-  }
-
-  .level-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .level-label {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
-  }
-
-  .level-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .level-badge[data-level='beginner'] {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .level-badge[data-level='intermediate'] {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .level-badge[data-level='advanced'] {
-    background: #fee2e2;
-    color: #991b1b;
   }
 
   @media (max-width: 768px) {

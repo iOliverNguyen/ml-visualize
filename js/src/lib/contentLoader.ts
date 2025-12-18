@@ -1,4 +1,4 @@
-import type { Glossary, FAQData } from '../types';
+import type { Glossary, FAQData, TutorialContent } from '../types';
 
 /**
  * Loads the glossary from external JSON file
@@ -33,16 +33,42 @@ export async function loadFAQs(): Promise<FAQData> {
 }
 
 /**
+ * Loads the tutorial from external JSON file
+ */
+export async function loadTutorial(): Promise<TutorialContent> {
+  try {
+    const response = await fetch('/content/tutorial.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load tutorial: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error loading tutorial:', error);
+    return {
+      meta: {
+        title: '',
+        description: '',
+        estimatedReadTime: 0,
+        version: '1.0'
+      },
+      chapters: []
+    };
+  }
+}
+
+/**
  * Loads all educational content at once
  */
 export async function loadAllContent() {
-  const [glossary, faqs] = await Promise.all([
+  const [glossary, faqs, tutorial] = await Promise.all([
     loadGlossary(),
-    loadFAQs()
+    loadFAQs(),
+    loadTutorial()
   ]);
 
   return {
     glossary,
-    faqs
+    faqs,
+    tutorial
   };
 }

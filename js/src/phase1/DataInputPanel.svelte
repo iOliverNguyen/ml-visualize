@@ -2,7 +2,7 @@
   import type { DataPoint } from './types';
 
   interface Props {
-    onDatasetChange: (snapshots: any[]) => void;
+    onDatasetChange: (snapshots: any[], config?: any) => void;
     loading?: boolean;
   }
 
@@ -55,7 +55,7 @@ return generateData(${numPoints});`);
     isGenerating = true;
 
     try {
-      const response = await fetch('http://localhost:8080/api/dataset/random', {
+      const response = await fetch('/api/dataset/random', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,25 @@ return generateData(${numPoints});`);
       }
 
       const snapshots = await response.json();
-      onDatasetChange(snapshots);
+
+      const config = {
+        name: 'Random Data',
+        data_config: {
+          num_points: numPoints,
+          x_min: xMin,
+          x_max: xMax,
+          true_slope: trueSlope,
+          noise_level: noiseLevel,
+          seed: seed || Date.now(),
+        },
+        training_config: {
+          w_init: wInit,
+          lr: learningRate,
+          steps: trainingSteps,
+        },
+      };
+
+      onDatasetChange(snapshots, config);
     } catch (e) {
       if (e instanceof Error && e.message.includes('fetch')) {
         error = 'Server not running. Start with: go run . --server';
@@ -133,7 +151,7 @@ return generateData(${numPoints});`);
       });
 
       // Send to backend for training
-      const response = await fetch('http://localhost:8080/api/dataset/custom', {
+      const response = await fetch('/api/dataset/custom', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,7 +172,21 @@ return generateData(${numPoints});`);
       }
 
       const snapshots = await response.json();
-      onDatasetChange(snapshots);
+
+      const config = {
+        name: 'Custom Function',
+        data_config: {
+          source: 'JavaScript function',
+          num_points: formattedData.length,
+        },
+        training_config: {
+          w_init: wInit,
+          lr: learningRate,
+          steps: trainingSteps,
+        },
+      };
+
+      onDatasetChange(snapshots, config);
     } catch (e) {
       if (e instanceof Error && e.message.includes('fetch')) {
         error = 'Server not running. Start with: go run . --server';

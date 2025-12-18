@@ -1,0 +1,208 @@
+{
+  "version": "1.0",
+  "cases": [
+    {
+      "id": "lr-small",
+      "name": "Learning Rate Too Small",
+      "description": "Tiny steps make convergence painfully slow. Watch gradient descent crawl toward the optimum.",
+      "emoji": "🐌",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 5,
+        "x2_min": 0,
+        "x2_max": 5,
+        "true_w1": 2,
+        "true_w2": 1.5,
+        "noise_level": 0.5,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 0,
+        "w2_init": 0,
+        "lr": 0.0001,
+        "steps": 200
+      },
+      "insights": [
+        "Tiny steps: learning rate = 0.0001",
+        "Converges very slowly, never reaches optimum",
+        "Gradient magnitude stays large even after 200 steps"
+      ]
+    },
+    {
+      "id": "lr-optimal",
+      "name": "Optimal Learning Rate",
+      "description": "The Goldilocks zone: smooth, efficient steps toward convergence. This is what you want.",
+      "emoji": "✓",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 5,
+        "x2_min": 0,
+        "x2_max": 5,
+        "true_w1": 2,
+        "true_w2": 1.5,
+        "noise_level": 0.5,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 0,
+        "w2_init": 0,
+        "lr": 0.01,
+        "steps": 100
+      },
+      "insights": [
+        "Smooth convergence in ~50 steps",
+        "Gradient magnitude decreases steadily",
+        "Direct path to optimum with minimal oscillation"
+      ]
+    },
+    {
+      "id": "lr-large",
+      "name": "Learning Rate Too Large",
+      "description": "Big steps overshoot the target. Watch the zigzag pattern as optimization bounces around.",
+      "emoji": "↔️",
+      "category": "learning-rate",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 5,
+        "x2_min": 0,
+        "x2_max": 5,
+        "true_w1": 2,
+        "true_w2": 1.5,
+        "noise_level": 0.5,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 0,
+        "w2_init": 0,
+        "lr": 0.1,
+        "steps": 100
+      },
+      "insights": [
+        "Overshooting causes zigzag pattern",
+        "Eventually converges but inefficiently",
+        "Large oscillations in parameter space"
+      ]
+    },
+    {
+      "id": "anisotropic-easy",
+      "name": "Anisotropic Loss Surface (Mild)",
+      "description": "Different scales in x1 vs x2 create an elliptical loss surface. Faster progress in one direction.",
+      "emoji": "⬭",
+      "category": "anisotropy",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 1,
+        "x2_min": 0,
+        "x2_max": 10,
+        "true_w1": 2,
+        "true_w2": 1.5,
+        "noise_level": 0.5,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 0,
+        "w2_init": 0,
+        "lr": 0.01,
+        "steps": 150
+      },
+      "insights": [
+        "Elliptical contours due to different x1/x2 scales",
+        "Faster movement in w2 direction",
+        "Still converges with standard learning rate"
+      ]
+    },
+    {
+      "id": "anisotropic-hard",
+      "name": "Anisotropic Loss Surface (Extreme)",
+      "description": "Extreme scale difference creates a narrow valley. Optimization struggles with zigzag motion.",
+      "emoji": "⬬",
+      "category": "anisotropy",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 1,
+        "x2_min": 0,
+        "x2_max": 20,
+        "true_w1": 2,
+        "true_w2": 0.5,
+        "noise_level": 0.3,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 0,
+        "w2_init": 0,
+        "lr": 0.008,
+        "steps": 200
+      },
+      "insights": [
+        "Very elongated ellipse creates narrow valley",
+        "Zigzag pattern even with reduced learning rate",
+        "Demonstrates why feature scaling matters"
+      ]
+    },
+    {
+      "id": "saddle-point",
+      "name": "Near-Saddle Geometry",
+      "description": "Starting near a saddle-like region shows curved, non-direct trajectory to optimum.",
+      "emoji": "〰️",
+      "category": "geometry",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": -2,
+        "x1_max": 3,
+        "x2_min": -2,
+        "x2_max": 3,
+        "true_w1": 2,
+        "true_w2": 1.5,
+        "noise_level": 0.5,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": -1,
+        "w2_init": -1,
+        "lr": 0.01,
+        "steps": 150
+      },
+      "insights": [
+        "Gradient direction changes rapidly",
+        "Curved trajectory through parameter space",
+        "Starting position affects convergence path"
+      ]
+    },
+    {
+      "id": "zigzag-convergence",
+      "name": "Zigzag with High LR + Anisotropy",
+      "description": "Combined effect: high learning rate meets anisotropic surface. Maximum zigzag demonstration.",
+      "emoji": "⚡",
+      "category": "geometry",
+      "data_config": {
+        "num_points": 20,
+        "x1_min": 0,
+        "x1_max": 1,
+        "x2_min": 0,
+        "x2_max": 15,
+        "true_w1": 2,
+        "true_w2": 0.8,
+        "noise_level": 0.4,
+        "seed": 42
+      },
+      "training_config": {
+        "w1_init": 3,
+        "w2_init": -1.5,
+        "lr": 0.03,
+        "steps": 200
+      },
+      "insights": [
+        "Bouncing back and forth dramatically",
+        "High LR + anisotropy = worst case scenario",
+        "Slow progress despite high learning rate"
+      ]
+    }
+  ]
+}

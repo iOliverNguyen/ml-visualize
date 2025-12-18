@@ -84,3 +84,69 @@ export interface FAQCategory {
 export interface FAQData {
   categories: FAQCategory[];
 }
+
+// Tutorial content types
+export interface TutorialSection {
+  type: 'text' | 'highlight' | 'code' | 'callout' | 'visual-reference';
+  content: string;
+  code?: {
+    language: string;
+    snippet: string;
+  };
+  calloutType?: 'info' | 'tip' | 'warning';
+}
+
+export interface TutorialChapter {
+  id: string;
+  number: number;
+  title: string;
+  sections: TutorialSection[];
+  visualCues?: {
+    highlightElements?: string[];
+    focusMetrics?: string[];
+    suggestedStep?: number;
+  };
+  estimatedReadTime?: number;
+}
+
+export interface TutorialContent {
+  meta: {
+    title: string;
+    description: string;
+    estimatedReadTime: number;
+    version: string;
+  };
+  chapters: TutorialChapter[];
+}
+
+// Case Library types
+export interface DataGenConfig {
+  num_points: number;
+  x_min: number;
+  x_max: number;
+  true_slope: number;
+  noise_level: number;
+  seed: number;
+}
+
+export interface TrainingConfig {
+  w_init: number;
+  lr: number;
+  steps: number;
+}
+
+export interface CaseConfig {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  category: 'foundational' | 'learning-rate' | 'initialization';
+  data_config: DataGenConfig;
+  training_config: TrainingConfig;
+  insights: string[];
+}
+
+export interface CaseManifest {
+  version: string;
+  cases: CaseConfig[];
+}

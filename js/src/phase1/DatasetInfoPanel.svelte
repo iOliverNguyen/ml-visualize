@@ -112,10 +112,9 @@
     <div class="param-row">
       <span class="param-label">Current w:</span>
       <span class="param-value current" class:close={isClose()}>
-        {currentW.toFixed(3)}
-        {#if isClose()}
-          <span class="check-mark">✓</span>
-        {/if}
+        {currentW.toFixed(3)}<span class="check-mark-w" class:visible={isClose()}>
+          <span class="check-mark" class:visible={isClose()}>✓</span>
+        </span>
       </span>
     </div>
 
@@ -252,6 +251,7 @@
 
   .param-value.current {
     color: #60a5fa;
+    position: relative;
   }
 
   .param-value.current.close {
@@ -259,8 +259,21 @@
   }
 
   .check-mark {
-    margin-left: 0.25rem;
     font-size: 1.2rem;
+  }
+
+  .check-mark-w {
+    display: inline-block;
+    width: 1px;
+    height: 100%;
+    margin-left: -1px;
+    opacity: 0;
+  }
+
+  .check-mark-w.visible {
+    width: 1rem;
+    margin-left: 0.5rem;
+    opacity: 1;
   }
 
   .progress-bar-container {

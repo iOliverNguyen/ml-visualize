@@ -23,10 +23,6 @@
     educationalState.saveToLocalStorage();
     onstartTour?.();
   }
-
-  function handleLevelSelect(level: 'beginner' | 'intermediate' | 'advanced') {
-    educationalState.setUserLevel(level);
-  }
 </script>
 
 {#if educationalState.state.showIntroPanel}
@@ -75,60 +71,17 @@
             <div class="step">
               <span class="step-number">1</span>
               <div class="step-content">
-                <strong>Choose your level</strong>
-                <p>Select your background to get appropriate explanations</p>
-              </div>
-            </div>
-            <div class="step">
-              <span class="step-number">2</span>
-              <div class="step-content">
                 <strong>Watch the training</strong>
                 <p>Click play and observe how the algorithm learns</p>
               </div>
             </div>
             <div class="step">
-              <span class="step-number">3</span>
+              <span class="step-number">2</span>
               <div class="step-content">
                 <strong>Explore interactively</strong>
                 <p>Click terms for definitions, hover for insights</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="level-selection">
-          <h2>Select Your Level</h2>
-          <div class="level-buttons">
-            <button
-              class="level-button"
-              class:selected={educationalState.state.userLevel === 'beginner'}
-              onclick={() => handleLevelSelect('beginner')}
-              type="button"
-            >
-              <span class="level-icon">🌱</span>
-              <span class="level-name">Beginner</span>
-              <span class="level-desc">New to machine learning</span>
-            </button>
-            <button
-              class="level-button"
-              class:selected={educationalState.state.userLevel === 'intermediate'}
-              onclick={() => handleLevelSelect('intermediate')}
-              type="button"
-            >
-              <span class="level-icon">🚀</span>
-              <span class="level-name">Intermediate</span>
-              <span class="level-desc">Some ML experience</span>
-            </button>
-            <button
-              class="level-button"
-              class:selected={educationalState.state.userLevel === 'advanced'}
-              onclick={() => handleLevelSelect('advanced')}
-              type="button"
-            >
-              <span class="level-icon">🎓</span>
-              <span class="level-name">Advanced</span>
-              <span class="level-desc">Solid ML background</span>
-            </button>
           </div>
         </div>
 
@@ -216,16 +169,14 @@
   }
 
   .what-section,
-  .how-section,
-  .level-selection {
+  .how-section {
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #e2e8f0;
   }
 
   .what-section:last-child,
-  .how-section:last-child,
-  .level-selection:last-child {
+  .how-section:last-child {
     border-bottom: none;
     margin-bottom: 0;
     padding-bottom: 0;
@@ -303,59 +254,6 @@
     line-height: 1.5;
   }
 
-  .level-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-  }
-
-  .level-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1.25rem;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-
-  .level-button:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  }
-
-  .level-button.selected {
-    background: #eff6ff;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .level-button:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-  }
-
-  .level-icon {
-    font-size: 2rem;
-  }
-
-  .level-name {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #0f172a;
-  }
-
-  .level-desc {
-    font-size: 0.85rem;
-    color: #64748b;
-  }
-
   .actions {
     display: flex;
     gap: 1rem;
@@ -419,10 +317,6 @@
 
     .intro-subtitle {
       font-size: 1rem;
-    }
-
-    .level-buttons {
-      grid-template-columns: 1fr;
     }
 
     .actions {
