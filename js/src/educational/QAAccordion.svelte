@@ -64,7 +64,7 @@
 </script>
 
 <div class="qa-accordion">
-  {#if filteredCategories().length === 0}
+  {#if filteredCategories.length === 0}
     <div class="empty-state">
       <p>No questions match your current filters.</p>
       {#if searchQuery}
@@ -72,7 +72,7 @@
       {/if}
     </div>
   {:else}
-    {#each filteredCategories() as category}
+    {#each filteredCategories as category}
       <div class="category-section">
         <h3 class="category-title">{category.name}</h3>
         <div class="questions">

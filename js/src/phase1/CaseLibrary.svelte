@@ -21,7 +21,7 @@
   $effect(() => {
     async function loadManifest() {
       try {
-        const response = await fetch('/cases/manifest.json');
+        const response = await fetch(`${import.meta.env.BASE_URL}cases/manifest.json`);
         if (!response.ok) {
           throw new Error('Failed to load case manifest');
         }
@@ -46,7 +46,7 @@
 
   async function handleCaseClick(caseConfig: CaseConfig) {
     try {
-      const response = await fetch(`/cases/${caseConfig.id}/snapshots.json`);
+      const response = await fetch(`${import.meta.env.BASE_URL}cases/${caseConfig.id}/snapshots.json`);
       if (!response.ok) {
         throw new Error(`Failed to load case ${caseConfig.id}`);
       }

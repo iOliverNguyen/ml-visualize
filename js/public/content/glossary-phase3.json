@@ -1,0 +1,192 @@
+{
+  "neuron": {
+    "term": "Neuron",
+    "brief": "A computational unit that sums weighted inputs, adds a bias, and applies an activation function.",
+    "detailed": "An artificial neuron mimics biological neurons by taking multiple inputs, multiplying each by a weight, adding a bias term, and passing the result through an activation function to produce an output.",
+    "comprehensive": "Neurons are the fundamental building blocks of neural networks. Each neuron performs a simple computation: z = w₁x₁ + w₂x₂ + ... + b, then a = σ(z). Despite their simplicity, when connected in layers, neurons can approximate any function. The neuron's parameters (weights and bias) are learned through gradient descent to minimize a loss function.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "z = \\sum_{i} w_i x_i + b, \\quad a = \\sigma(z)",
+    "relatedTerms": ["activation-function", "forward-pass", "weights", "bias"],
+    "example": "If x₁=2, x₂=3, w₁=0.5, w₂=0.3, b=1, then z = 0.5(2) + 0.3(3) + 1 = 2.9"
+  },
+  "activation-function": {
+    "term": "Activation Function",
+    "brief": "A function that transforms the weighted sum into the neuron's output.",
+    "detailed": "Activation functions introduce non-linearity into neural networks, allowing them to learn complex patterns. Common examples include sigmoid, ReLU, and tanh. Each has different properties affecting training speed and gradient flow.",
+    "comprehensive": "Activation functions are critical for neural networks to approximate non-linear functions. Without them, stacking layers would just produce linear transformations. The choice of activation function affects: (1) training speed, (2) gradient flow during backpropagation, (3) whether the network suffers from saturation, and (4) the types of patterns the network can learn. Modern research continues to develop new activations like GELU and Swish.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "a = \\sigma(z)",
+    "relatedTerms": ["sigmoid", "relu", "tanh", "pre-activation", "post-activation", "saturation"],
+    "example": "If z = 2.5, then sigmoid(z) = 0.924, ReLU(z) = 2.5, and tanh(z) = 0.987."
+  },
+  "sigmoid": {
+    "term": "Sigmoid",
+    "brief": "An S-shaped activation function that maps inputs to values between 0 and 1.",
+    "detailed": "The sigmoid function σ(z) = 1/(1 + e^(-z)) produces smooth outputs in the range (0, 1). It's historically important but suffers from saturation at extremes (large positive or negative z), causing vanishing gradients.",
+    "comprehensive": "Sigmoid was widely used in early neural networks because its output can be interpreted as a probability, making it ideal for binary classification. However, it has fallen out of favor for hidden layers because: (1) it saturates for |z| > 5, causing vanishing gradients, (2) outputs are not zero-centered, creating optimization challenges, and (3) the exponential is computationally expensive. Today, sigmoid is mainly used for binary classification output layers.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\sigma(z) = \\frac{1}{1 + e^{-z}}, \\quad \\sigma'(z) = \\sigma(z)(1 - \\sigma(z))",
+    "relatedTerms": ["activation-function", "saturation", "vanishing-gradient", "tanh"],
+    "example": "σ(0) = 0.5, σ(5) = 0.993 (nearly saturated), σ(-5) = 0.007 (nearly saturated)"
+  },
+  "relu": {
+    "term": "ReLU",
+    "brief": "Rectified Linear Unit: max(0, z). Zero for negative inputs, identity for positive inputs.",
+    "detailed": "ReLU is the most popular activation function for hidden layers in deep networks. It's computationally efficient, doesn't saturate for positive values, and empirically trains faster than sigmoid or tanh. However, neurons can 'die' if they get stuck outputting zero.",
+    "comprehensive": "ReLU revolutionized deep learning by addressing the vanishing gradient problem. Benefits: (1) computational efficiency (just thresholding at zero), (2) no saturation for z > 0, enabling faster training, (3) induces sparsity (many neurons output zero). Drawbacks: (1) 'dying ReLU' problem when neurons get stuck with negative z, (2) not differentiable at z=0 (though subgradients work in practice), (3) unbounded outputs. Variants like Leaky ReLU, PReLU, and ELU address these issues.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\text{ReLU}(z) = \\max(0, z), \\quad \\text{ReLU}'(z) = \\begin{cases} 1 & z > 0 \\\\ 0 & z \\leq 0 \\end{cases}",
+    "relatedTerms": ["activation-function", "leaky-relu", "dead-relu", "saturation"],
+    "example": "ReLU(2.5) = 2.5, ReLU(-1.3) = 0, ReLU(0) = 0"
+  },
+  "tanh": {
+    "term": "Tanh",
+    "brief": "Hyperbolic tangent function that maps inputs to values between -1 and 1.",
+    "detailed": "The tanh function maps inputs to the range (-1, 1) and is zero-centered, making it preferable to sigmoid for hidden layers. However, it still suffers from saturation at extremes, causing vanishing gradients similar to sigmoid.",
+    "comprehensive": "Tanh is essentially a rescaled sigmoid: tanh(z) = 2σ(2z) - 1. Being zero-centered means positive and negative inputs produce positive and negative outputs, which helps with optimization. Like sigmoid, tanh saturates for |z| > 3, causing vanishing gradients in deep networks. It's occasionally used when you need outputs centered around zero, but has largely been replaced by ReLU and its variants for hidden layers.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\tanh(z) = \\frac{e^z - e^{-z}}{e^z + e^{-z}}, \\quad \\tanh'(z) = 1 - \\tanh^2(z)",
+    "relatedTerms": ["activation-function", "sigmoid", "saturation", "vanishing-gradient"],
+    "example": "tanh(0) = 0, tanh(2) = 0.964, tanh(-2) = -0.964"
+  },
+  "forward-pass": {
+    "term": "Forward Pass",
+    "brief": "Computing the output from inputs by flowing data through the network.",
+    "detailed": "The forward pass computes predictions by applying operations in sequence: weighted sums, activation functions, and passing results to subsequent layers. For a single neuron: z = w·x + b, then a = σ(z).",
+    "comprehensive": "The forward pass is the inference phase where the network makes predictions. Data flows from input to output, with each layer transforming its input based on learned parameters. For training, we need both the forward pass (to compute loss) and the backward pass (to compute gradients). The forward pass is typically fast, dominated by matrix multiplications. Intermediate activations must be cached during training for use in backpropagation.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "z = Wx + b, \\quad a = \\sigma(z)",
+    "relatedTerms": ["backward-pass", "pre-activation", "post-activation", "neuron"],
+    "example": "For x=[1, 2], w=[0.5, 0.3], b=1: z=2.1, then a=sigmoid(2.1)=0.891"
+  },
+  "backward-pass": {
+    "term": "Backward Pass",
+    "brief": "Computing gradients by propagating errors backward through the network using the chain rule.",
+    "detailed": "Backpropagation computes how the loss changes with respect to each parameter. Starting from the loss, we recursively apply the chain rule to compute gradients for weights and biases, moving from output layers back to input layers.",
+    "comprehensive": "Backpropagation is the algorithm that makes neural network training feasible. It efficiently computes gradients in O(n) time (where n is the number of parameters) by reusing intermediate results. The key insight: ∂L/∂w_i = ∂L/∂a × ∂a/∂z × ∂z/∂w_i. This decomposition allows us to compute gradients layer by layer. The algorithm requires storing forward pass activations (memory-intensive for deep networks) but is parallelizable on GPUs. Understanding backpropagation is essential for debugging training issues.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial a} \\times \\frac{\\partial a}{\\partial z} \\times \\frac{\\partial z}{\\partial w}",
+    "relatedTerms": ["chain-rule", "gradient", "forward-pass", "local-derivative"],
+    "example": "If ∂L/∂a=0.5, ∂a/∂z=0.2, ∂z/∂w=x=2, then ∂L/∂w = 0.5×0.2×2 = 0.2"
+  },
+  "chain-rule": {
+    "term": "Chain Rule",
+    "brief": "A calculus rule for computing the derivative of composed functions.",
+    "detailed": "The chain rule states that the derivative of f(g(x)) is f'(g(x)) × g'(x). In neural networks, we use this to compute how the loss changes with respect to parameters by chaining together derivatives through each layer.",
+    "comprehensive": "The chain rule is the mathematical foundation of backpropagation. For a neural network, the loss L is a composition of many functions. To find ∂L/∂w for any parameter w, we multiply derivatives along the path from L back to w. This is why the 'chain' in 'chain rule' - we chain together local derivatives. Deep networks have long chains, which can cause vanishing (products of many small derivatives) or exploding (products of many large derivatives) gradients.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial a} \\cdot \\frac{\\partial a}{\\partial z} \\cdot \\frac{\\partial z}{\\partial w}",
+    "relatedTerms": ["backward-pass", "gradient", "local-derivative", "partial-derivative"],
+    "example": "For L(a(z(w))), compute ∂L/∂w by multiplying three terms: ∂L/∂a, ∂a/∂z, ∂z/∂w"
+  },
+  "saturation": {
+    "term": "Saturation",
+    "brief": "When an activation function's derivative approaches zero, hindering learning.",
+    "detailed": "Saturation occurs in flat regions of activation functions like sigmoid and tanh. When |σ'(z)| < 0.01, gradients become tiny, making learning extremely slow. This is a major cause of the vanishing gradient problem.",
+    "comprehensive": "Saturation is one of the key challenges in training deep neural networks. It occurs when neurons operate in regions where the activation function is nearly flat. For sigmoid, this happens when z > 5 or z < -5. For tanh, around |z| > 3. In these regions, σ'(z) ≈ 0, so ∂L/∂w ≈ 0 regardless of other factors. The neuron stops learning. Solutions: (1) use non-saturating activations like ReLU, (2) careful weight initialization to keep z in the linear region, (3) batch normalization to control activation distributions, (4) skip connections to provide alternative gradient paths.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "|\\sigma'(z)| < 0.01 \\text{ (saturation threshold)}",
+    "relatedTerms": ["vanishing-gradient", "local-derivative", "sigmoid", "tanh"],
+    "example": "For sigmoid: σ'(0)=0.25 (active), σ'(5)=0.0066 (saturated)"
+  },
+  "vanishing-gradient": {
+    "term": "Vanishing Gradient",
+    "brief": "When gradients become too small to effectively update weights during training.",
+    "detailed": "Vanishing gradients occur when the product of many small derivatives (from saturation or deep layers) results in negligible gradients for early layers. This makes it nearly impossible to train deep networks with saturating activations.",
+    "comprehensive": "The vanishing gradient problem was a major obstacle to training deep networks before ReLU and other innovations. Causes: (1) saturating activation functions multiply gradients by values near zero, (2) deep networks chain together many derivatives, and products of values < 1 shrink exponentially, (3) poor weight initialization. Consequences: early layers stop learning while later layers train normally. Solutions: ReLU activations, residual connections (ResNet), LSTM/GRU cells for sequences, batch normalization, careful initialization (Xavier/He), gradient clipping.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\frac{\\partial L}{\\partial w_1} = \\frac{\\partial L}{\\partial a_n} \\prod_{i=1}^{n} \\sigma'(z_i) \\xrightarrow{} 0",
+    "relatedTerms": ["saturation", "exploding-gradient", "relu", "local-derivative"],
+    "example": "If each layer multiplies gradients by 0.1, after 5 layers: 0.1^5 = 0.00001"
+  },
+  "pre-activation": {
+    "term": "Pre-activation (z)",
+    "brief": "The weighted sum before applying the activation function.",
+    "detailed": "The pre-activation value z = w₁x₁ + w₂x₂ + ... + b is the linear combination of inputs before the non-linear activation function is applied. It's also called the logit in certain contexts.",
+    "comprehensive": "The pre-activation z is a key intermediate value in neural networks. It's the result of the neuron's linear transformation but before the non-linearity. Analyzing z distributions helps diagnose training issues: (1) if z values are too large, sigmoid/tanh will saturate, (2) if z is consistently negative, ReLU neurons may die, (3) proper initialization aims to keep z in a reasonable range. Batch normalization operates on z values to stabilize training. In visualization, tracking z helps understand why certain activations saturate.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "z = \\sum_i w_i x_i + b = \\mathbf{w}^T \\mathbf{x} + b",
+    "relatedTerms": ["post-activation", "neuron", "forward-pass", "activation-function"],
+    "example": "For x=[2, 3], w=[0.5, 0.3], b=1: z = 0.5(2) + 0.3(3) + 1 = 2.9"
+  },
+  "post-activation": {
+    "term": "Post-activation (a)",
+    "brief": "The neuron's output after applying the activation function to z.",
+    "detailed": "The post-activation value a = σ(z) is the neuron's final output, obtained by passing the pre-activation z through the activation function. This becomes the input to the next layer or the network's prediction.",
+    "comprehensive": "The post-activation a is what the neuron actually outputs and what gets passed to subsequent layers. Its range depends on the activation function: sigmoid produces (0,1), tanh produces (-1,1), ReLU produces [0,∞). The distribution of activations affects training dynamics. Techniques like batch normalization and layer normalization aim to control activation distributions. In backpropagation, we compute ∂L/∂a as part of the chain rule, representing how the loss changes with respect to this neuron's output.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "a = \\sigma(z)",
+    "relatedTerms": ["pre-activation", "activation-function", "neuron", "forward-pass"],
+    "example": "If z=2.9 and using sigmoid: a = σ(2.9) = 0.948"
+  },
+  "local-derivative": {
+    "term": "Local Derivative (σ'(z))",
+    "brief": "The derivative of the activation function, crucial for backpropagation.",
+    "detailed": "The local derivative σ'(z) = ∂a/∂z measures how much the activation changes for a small change in the pre-activation. It's the middle term in the chain rule and determines how well gradients flow during backpropagation.",
+    "comprehensive": "The local derivative is central to understanding training dynamics. For sigmoid: σ'(z) = σ(z)(1-σ(z)), maximum at z=0 (σ'(0)=0.25), approaching zero for |z|>5. For ReLU: σ'(z) = 1 for z>0, else 0. For tanh: σ'(z) = 1-tanh²(z). When σ'(z) is small (saturation), gradients vanish. When σ'(z) is large, gradients can explode. The ideal activation has σ'(z) ≈ 1 to preserve gradient magnitude. Visualizing σ'(z) reveals saturation zones and explains why certain architectures train poorly.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\frac{\\partial a}{\\partial z} = \\sigma'(z)",
+    "relatedTerms": ["activation-function", "chain-rule", "saturation", "gradient-flow"],
+    "example": "For sigmoid at z=0: σ'(0)=0.25. At z=5: σ'(5)=0.0066 (saturated)."
+  },
+  "weights": {
+    "term": "Weights (w)",
+    "brief": "Learnable parameters that scale input contributions in the neuron's computation.",
+    "detailed": "Weights determine how much each input affects the neuron's output. During training, gradient descent adjusts weights to minimize loss. Larger weight magnitudes mean stronger influence from that input.",
+    "comprehensive": "Weights are the primary learnable parameters in neural networks. Each connection between neurons has an associated weight. The weight matrix W for a layer has dimensions (outputs × inputs). Properties: (1) initialized randomly (Xavier/He initialization), (2) updated via gradient descent: w ← w - η∂L/∂w, (3) magnitude indicates feature importance, (4) sign indicates whether the feature excites (positive) or inhibits (negative) the neuron. Weight regularization (L1/L2) prevents overfitting. Weight distributions evolve during training - tracking them helps diagnose training issues.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "z = \\sum_i w_i x_i + b",
+    "relatedTerms": ["bias", "gradient", "neuron", "pre-activation"],
+    "example": "If w=[0.8, -0.3], the neuron favors first input (positive weight) and is inhibited by second input (negative weight)."
+  },
+  "bias": {
+    "term": "Bias (b)",
+    "brief": "A learnable parameter that shifts the neuron's activation threshold.",
+    "detailed": "The bias b is added to the weighted sum before the activation function. It allows the neuron to produce non-zero outputs even when all inputs are zero, effectively shifting the decision boundary.",
+    "comprehensive": "Bias terms are crucial for neural network expressiveness. Without bias, the neuron can only model relationships passing through the origin. With bias, we can model arbitrary affine transformations. For a single neuron: z = wx + b defines a line that doesn't need to pass through (0,0). In geometric terms, bias translates the decision boundary. Like weights, biases are learned via gradient descent: b ← b - η∂L/∂b. Note that ∂z/∂b = 1, so the bias gradient depends only on the upstream gradient. Some architectures (batch norm) can omit explicit bias terms.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "z = \\sum_i w_i x_i + b",
+    "relatedTerms": ["weights", "neuron", "pre-activation", "gradient"],
+    "example": "With b=1, even if x=[0,0], z=1 (not zero). The bias shifts the decision threshold."
+  },
+  "gradient": {
+    "term": "Gradient",
+    "brief": "The direction and rate of steepest increase of a function.",
+    "detailed": "In machine learning, gradients tell us how to adjust parameters to reduce loss. The gradient ∂L/∂w indicates how much the loss changes for a small change in weight w. Gradient descent moves parameters opposite to the gradient.",
+    "comprehensive": "Gradients are vectors pointing in the direction of steepest ascent. The gradient ∇L = [∂L/∂w₁, ∂L/∂w₂, ...] contains partial derivatives for all parameters. Gradient descent updates: w ← w - η∇L, where η is the learning rate. Properties: (1) magnitude indicates sensitivity (large gradient = loss changes quickly), (2) sign indicates direction (positive = increase w to increase loss, so we subtract), (3) zero gradient = local minimum/maximum/saddle point. Challenges: vanishing/exploding gradients, noisy estimates (mini-batch), saddle points, local minima. Advanced optimizers (Adam, RMSProp) use gradient history for better updates.",
+    "level": ["beginner", "intermediate", "advanced"],
+    "formula": "\\nabla L = \\left[\\frac{\\partial L}{\\partial w_1}, \\frac{\\partial L}{\\partial w_2}, \\ldots\\right]",
+    "relatedTerms": ["partial-derivative", "chain-rule", "gradient-flow", "backward-pass"],
+    "example": "If ∂L/∂w=0.5, increasing w by 0.1 increases loss by ≈0.05. So decrease w to reduce loss."
+  },
+  "gradient-flow": {
+    "term": "Gradient Flow",
+    "brief": "How gradients propagate backward through layers during training.",
+    "detailed": "Gradient flow describes the magnitude and direction of gradients as they backpropagate from loss to early layers. Good gradient flow means all layers receive strong learning signals. Poor flow (vanishing/exploding) causes training problems.",
+    "comprehensive": "Gradient flow is a lens for analyzing neural network training. Healthy gradient flow: magnitudes remain relatively constant across layers, all parameters update at reasonable rates. Poor gradient flow manifests as: (1) vanishing gradients (early layers barely update), (2) exploding gradients (NaN/Inf values), (3) oscillations (training unstable). Causes of poor flow: saturating activations, very deep networks, poor initialization, large learning rates. Solutions: ReLU/variants, batch/layer normalization, residual connections (skip connections provide alternative gradient paths), gradient clipping, careful initialization. Visualizing gradient magnitudes layer-by-layer reveals flow problems.",
+    "level": ["intermediate", "advanced"],
+    "formula": "\\frac{\\partial L}{\\partial w_1} = \\frac{\\partial L}{\\partial w_n} \\prod_{i=1}^{n-1} \\frac{\\partial w_{i+1}}{\\partial w_i}",
+    "relatedTerms": ["gradient", "vanishing-gradient", "exploding-gradient", "chain-rule"],
+    "example": "If each layer multiplies gradients by 0.9, after 10 layers: 0.9^10 ≈ 0.35 (moderate dampening)."
+  },
+  "dead-relu": {
+    "term": "Dead ReLU",
+    "brief": "A ReLU neuron that always outputs zero because its pre-activation is always negative.",
+    "detailed": "Dead ReLU neurons have z < 0 for all inputs, so they output 0 and contribute nothing to the network. Their gradients are zero, preventing any learning. This can occur with large negative biases or unfortunate weight updates.",
+    "comprehensive": "The dying ReLU problem affects networks using ReLU activation. Once a neuron enters the negative region (z < 0), it outputs zero and receives zero gradient (since ReLU'(z)=0 for z<0). The neuron is 'stuck' and will never recover. Causes: (1) large learning rates causing weights to jump into negative territory, (2) large negative biases, (3) poor initialization. Signs: many neurons outputting zero, training plateaus. Solutions: (1) Leaky ReLU (small slope for z<0), (2) ELU (smooth variant with non-zero gradient), (3) lower learning rate, (4) better initialization (He initialization). Monitoring percentage of dead neurons helps diagnose this issue.",
+    "level": ["intermediate", "advanced"],
+    "formula": "\\text{If } z < 0 \\text{ always, then } a = 0 \\text{ and } \\frac{\\partial L}{\\partial w} = 0",
+    "relatedTerms": ["relu", "leaky-relu", "gradient", "saturation"],
+    "example": "If w=[-1,-1] and inputs are always positive, z is always negative, neuron is dead."
+  },
+  "leaky-relu": {
+    "term": "Leaky ReLU",
+    "brief": "A variant of ReLU with a small negative slope instead of zero for negative inputs.",
+    "detailed": "Leaky ReLU uses max(αz, z) where α is a small constant (e.g., 0.01). This allows small gradients even for negative z, preventing the dying ReLU problem while retaining most of ReLU's benefits.",
+    "comprehensive": "Leaky ReLU was designed to address the dying ReLU problem. For z > 0, it's identical to ReLU. For z < 0, instead of outputting zero, it outputs αz where α ≈ 0.01. Benefits: (1) never fully saturates, (2) allows gradients to flow even for negative z, (3) can recover from negative region. Variants: PReLU (α is learned), RReLU (α is random during training). Empirically, Leaky ReLU and variants often outperform standard ReLU, especially in deep networks. The negative slope α is a hyperparameter, typically set to 0.01 or 0.1.",
+    "level": ["intermediate", "advanced"],
+    "formula": "\\text{LeakyReLU}(z) = \\max(\\alpha z, z), \\quad \\alpha \\approx 0.01",
+    "relatedTerms": ["relu", "dead-relu", "activation-function"],
+    "example": "If α=0.01: LeakyReLU(2)=2, LeakyReLU(-2)=-0.02 (not zero!)"
+  }
+}

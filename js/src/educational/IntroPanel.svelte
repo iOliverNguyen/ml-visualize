@@ -20,6 +20,7 @@
     educationalState.state.tourActive = true;
     educationalState.state.currentTourStep = 0;
     educationalState.state.showIntroPanel = false;
+    educationalState.toggleSidebar(true);
     educationalState.saveToLocalStorage();
     onstartTour?.();
   }
@@ -87,10 +88,10 @@
 
         <div class="actions">
           <button class="primary-button" onclick={handleStartTour} type="button">
-            Start Guided Tour
+            Let's Start
           </button>
           <button class="secondary-button" onclick={handleClose} type="button">
-            Explore on My Own
+            Explore
           </button>
         </div>
       </div>

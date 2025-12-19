@@ -113,7 +113,7 @@
         snapshotsReady = false;
 
         // Fetch only 5KB config file
-        const configResp = await fetch('/cases-phase2/lr-optimal/config.json');
+        const configResp = await fetch(`${import.meta.env.BASE_URL}cases-phase2/lr-optimal/config.json`);
         if (!configResp.ok) {
           throw new Error('Failed to load config');
         }

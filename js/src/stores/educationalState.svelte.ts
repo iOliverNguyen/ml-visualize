@@ -75,8 +75,12 @@ export function setUserLevel(level: 'beginner' | 'intermediate' | 'advanced') {
 /**
  * Toggle sidebar visibility
  */
-export function toggleSidebar() {
-  _showSidebar = !_showSidebar;
+export function toggleSidebar(state?: boolean) {
+  if (typeof state === 'boolean') {
+    _showSidebar = state;
+  } else {
+    _showSidebar = !_showSidebar;
+  }
   saveToLocalStorage();
 }
 

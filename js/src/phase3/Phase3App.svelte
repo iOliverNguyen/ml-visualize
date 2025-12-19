@@ -4,7 +4,12 @@
   import ActivationCurveViz from './ActivationCurveViz.svelte';
   import ChainRuleBreakdown from './ChainRuleBreakdown.svelte';
   import NeuronDiagram from './NeuronDiagram.svelte';
+  import Sidebar from '../educational/Sidebar.svelte';
+  import IntroPanel from '../educational/IntroPanel.svelte';
+  import * as educationalState from '../stores/educationalState.svelte';
+  import { loadAllContent } from '../lib/contentLoader';
   import type { NeuronSnapshot, NeuronTrainingCase } from './types';
+  import type { Glossary, FAQData, TutorialContent } from '../types';
 
   // State management
   let snapshots = $state<NeuronSnapshot[]>([]);
@@ -15,6 +20,15 @@
   let error = $state('');
   let selectedCase = $state('sigmoid-optimal');
   let caseInfo = $state<{description: string; category: string; activation: string} | null>(null);
+
+  // Educational content
+  let glossary = $state<Glossary>({});
+  let faqs = $state<FAQData>({ categories: [] });
+  let tutorial = $state<TutorialContent>({
+    meta: { title: '', description: '', estimatedReadTime: 0, version: '1.0' },
+    chapters: []
+  });
+  let contentLoading = $state(true);
 
   // List of available cases
   const availableCases = [
@@ -132,7 +146,7 @@
       loading = true;
       error = '';
       try {
-        const response = await fetch(`/cases-phase3/${selectedCase}/snapshots.json`);
+        const response = await fetch(`${import.meta.env.BASE_URL}cases-phase3/${selectedCase}/snapshots.json`);
         if (!response.ok) {
           throw new Error(`Failed to load case: ${response.statusText}`);
         }
@@ -153,6 +167,24 @@
       }
     }
     loadCase();
+  });
+
+  // Load educational content
+  $effect(() => {
+    async function loadContent() {
+      try {
+        const content = await loadAllContent('phase3');
+        glossary = content.glossary;
+        faqs = content.faqs;
+        tutorial = content.tutorial;
+      } catch (error) {
+        console.error('Failed to load Phase 3 educational content:', error);
+        // Use empty defaults if content fails to load
+      } finally {
+        contentLoading = false;
+      }
+    }
+    loadContent();
   });
 
   // Playback control functions
@@ -221,13 +253,50 @@
   }
 </script>
 
-<div class="phase3-app">
-  <div class="header">
-    <h1>🧠 Phase 3: Single Neuron with Activation Functions</h1>
-    <p class="subtitle">
-      Explore how activation functions (σ, ReLU, tanh) affect training through saturation, vanishing gradients, and the chain rule
-    </p>
-  </div>
+<div class="app-layout">
+  <main class:with-sidebar={educationalState.state.showSidebar && !contentLoading}>
+    <header class="app-header">
+      <div class="header-content">
+        <h1>Phase 3: Single Neuron with Activation Functions</h1>
+        <p class="subtitle">
+          Explore how activation functions (σ, ReLU, tanh) affect training through saturation, vanishing gradients, and the chain rule
+        </p>
+      </div>
+
+      <div class="header-buttons">
+        {#if !educationalState.state.showIntroPanel}
+          <button
+            class="intro-button"
+            onclick={() => {
+              educationalState.state.showIntroPanel = true;
+              educationalState.saveToLocalStorage();
+            }}
+            aria-label="Show introduction panel"
+            type="button"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Welcome
+          </button>
+        {/if}
+        <button
+          class="help-button"
+          onclick={() => educationalState.toggleSidebar()}
+          aria-label="Toggle help sidebar"
+          type="button"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Help
+        </button>
+      </div>
+    </header>
+
+    <IntroPanel />
 
   <div class="case-selector">
     <label for="case-select">Select Case:</label>
@@ -290,30 +359,104 @@
       </p>
     </div>
   {/if}
+  </main>
+
+  {#if !contentLoading && educationalState.state.showSidebar}
+    <Sidebar {glossary} {faqs} {tutorial} />
+  {/if}
 </div>
 
 <style>
-  .phase3-app {
-    max-width: 1400px;
-    margin: 0 auto;
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  main {
+    flex: 1;
+    min-width: 0;
     padding: 2rem;
+    max-width: 1800px;
+    margin: 0 auto;
+    transition: margin-right 0.3s ease;
   }
 
-  .header {
-    text-align: center;
+  main.with-sidebar {
+    margin-right: 550px;
+  }
+
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 2rem;
+    gap: 1rem;
   }
 
-  .header h1 {
-    font-size: 2rem;
+  .header-content h1 {
     margin: 0 0 0.5rem 0;
-    color: #1e293b;
+    font-size: 2rem;
+    color: #2563eb;
   }
 
-  .subtitle {
-    color: #64748b;
-    font-size: 1rem;
+  .header-content .subtitle {
     margin: 0;
+    font-size: 1.1rem;
+    color: #64748b;
+  }
+
+  .header-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .intro-button,
+  .help-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .intro-button {
+    background: #10b981;
+    color: white;
+  }
+
+  .intro-button:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .intro-button:focus {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+  }
+
+  .help-button {
+    background: #667eea;
+    color: white;
+  }
+
+  .help-button:hover {
+    background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .help-button:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
   }
 
   .case-selector {
@@ -399,13 +542,34 @@
     padding-left: 1rem;
   }
 
+  @media (max-width: 1024px) {
+    main.with-sidebar {
+      margin-right: 0;
+    }
+  }
+
   @media (max-width: 768px) {
-    .phase3-app {
+    main {
       padding: 1rem;
     }
 
-    .header h1 {
-      font-size: 1.5rem;
+    main.with-sidebar {
+      margin-right: 0;
+    }
+
+    .app-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .header-buttons {
+      width: 100%;
+    }
+
+    .intro-button,
+    .help-button {
+      flex: 1;
+      justify-content: center;
     }
 
     .case-selector {

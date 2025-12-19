@@ -158,12 +158,12 @@
         <TutorialArticle {tutorial} {tocOpen} {toggleTOC} />
       {:else if activeTab === 'glossary'}
         <div class="glossary-list">
-          {#if filteredGlossaryTerms().length === 0}
+          {#if filteredGlossaryTerms.length === 0}
             <div class="empty-state">
               <p>No terms found.</p>
             </div>
           {:else}
-            {#each filteredGlossaryTerms() as [termId, entry]}
+            {#each filteredGlossaryTerms as [termId, entry]}
               <div data-term-id={termId}>
                 <GlossaryTooltip
                   term={entry.term}

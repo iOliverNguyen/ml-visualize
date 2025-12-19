@@ -2,12 +2,12 @@ import type { Glossary, FAQData, TutorialContent } from '../types';
 
 /**
  * Loads the glossary from external JSON file
- * @param phase - Optional phase identifier (phase1 or phase2)
+ * @param phase - Optional phase identifier (phase1, phase2, or phase3)
  */
-export async function loadGlossary(phase?: 'phase1' | 'phase2'): Promise<Glossary> {
+export async function loadGlossary(phase?: 'phase1' | 'phase2' | 'phase3'): Promise<Glossary> {
   try {
-    const suffix = phase === 'phase2' ? '-phase2' : '';
-    const response = await fetch(`/content/glossary${suffix}.json`);
+    const suffix = phase ? `-${phase}` : '';
+    const response = await fetch(`${import.meta.env.BASE_URL}content/glossary${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load glossary: ${response.statusText}`);
     }
@@ -20,12 +20,12 @@ export async function loadGlossary(phase?: 'phase1' | 'phase2'): Promise<Glossar
 
 /**
  * Loads FAQs from external JSON file
- * @param phase - Optional phase identifier (phase1 or phase2)
+ * @param phase - Optional phase identifier (phase1, phase2, or phase3)
  */
-export async function loadFAQs(phase?: 'phase1' | 'phase2'): Promise<FAQData> {
+export async function loadFAQs(phase?: 'phase1' | 'phase2' | 'phase3'): Promise<FAQData> {
   try {
-    const suffix = phase === 'phase2' ? '-phase2' : '';
-    const response = await fetch(`/content/faqs${suffix}.json`);
+    const suffix = phase ? `-${phase}` : '';
+    const response = await fetch(`${import.meta.env.BASE_URL}content/faqs${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load FAQs: ${response.statusText}`);
     }
@@ -38,12 +38,12 @@ export async function loadFAQs(phase?: 'phase1' | 'phase2'): Promise<FAQData> {
 
 /**
  * Loads the tutorial from external JSON file
- * @param phase - Optional phase identifier (phase1 or phase2)
+ * @param phase - Optional phase identifier (phase1, phase2, or phase3)
  */
-export async function loadTutorial(phase?: 'phase1' | 'phase2'): Promise<TutorialContent> {
+export async function loadTutorial(phase?: 'phase1' | 'phase2' | 'phase3'): Promise<TutorialContent> {
   try {
-    const suffix = phase === 'phase2' ? '-phase2' : '';
-    const response = await fetch(`/content/tutorial${suffix}.json`);
+    const suffix = phase ? `-${phase}` : '';
+    const response = await fetch(`${import.meta.env.BASE_URL}content/tutorial${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load tutorial: ${response.statusText}`);
     }
@@ -64,9 +64,9 @@ export async function loadTutorial(phase?: 'phase1' | 'phase2'): Promise<Tutoria
 
 /**
  * Loads all educational content at once
- * @param phase - Optional phase identifier (phase1 or phase2)
+ * @param phase - Optional phase identifier (phase1, phase2, or phase3)
  */
-export async function loadAllContent(phase?: 'phase1' | 'phase2') {
+export async function loadAllContent(phase?: 'phase1' | 'phase2' | 'phase3') {
   const [glossary, faqs, tutorial] = await Promise.all([
     loadGlossary(phase),
     loadFAQs(phase),

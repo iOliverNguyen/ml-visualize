@@ -1,0 +1,354 @@
+{
+  "meta": {
+    "title": "Understanding Single Neurons & Activation Functions",
+    "description": "Phase 3 reveals the inner workings of individual neurons: how non-linear activation functions transform inputs, why gradients vanish, and how the chain rule enables backpropagation through computational graphs.",
+    "estimatedReadTime": 25,
+    "version": "1.0"
+  },
+  "chapters": [
+    {
+      "id": "chapter-17",
+      "number": 17,
+      "title": "From Linear to Non-Linear: Why Neurons Matter",
+      "sections": [
+        {
+          "type": "text",
+          "content": "In Phases 1 and 2, we modeled relationships with linear functions: y = w*x and y = w₁*x₁ + w₂*x₂. These models can fit lines and planes, but the real world isn't linear. Predicting whether an email is spam requires drawing curved decision boundaries. Recognizing objects in images requires detecting complex patterns. Classification problems need outputs that represent probabilities."
+        },
+        {
+          "type": "text",
+          "content": "Enter the neuron - the building block that adds non-linearity to linear models. A neuron is a two-stage computation: first compute a weighted sum (just like Phase 2), then apply a non-linear activation function that transforms the result. This seemingly simple addition gives neural networks the power to approximate any function."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Neuron computation (two stages):\n\nStage 1 (pre-activation): z = w₁*x₁ + w₂*x₂ + b\nStage 2 (activation):     a = σ(z)\n\nwhere σ is the activation function (sigmoid, ReLU, tanh, etc.)"
+          }
+        },
+        {
+          "type": "highlight",
+          "content": "The pre-activation z is linear (a weighted sum), but the activation a is non-linear (transformed by σ). This non-linearity is what allows networks to learn curves, boundaries, and complex patterns."
+        },
+        {
+          "type": "text",
+          "content": "In this phase, you'll visualize a single neuron with two inputs (x₁, x₂), two weights (w₁, w₂), and a bias (b). You'll watch how different activation functions (sigmoid, ReLU, tanh) transform the pre-activation z into the output a. You'll see gradients computed through the chain rule, flowing backwards from loss to parameters. And you'll understand why saturation causes vanishing gradients that can halt learning."
+        },
+        {
+          "type": "visual-reference",
+          "content": "Look at the Neuron Architecture diagram. Follow the data flow: inputs (x₁, x₂) → weighted sum (z) → activation function (σ) → output (a). The weights (w₁, w₂) and bias (b) are the learnable parameters that gradient descent will optimize."
+        },
+        {
+          "type": "callout",
+          "calloutType": "tip",
+          "content": "Start with the 'Sigmoid Optimal' case and click play. Watch the neuron's parameters evolve and observe how z and a change over time."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["Neuron Architecture"],
+        "focusMetrics": ["w₁", "w₂", "b", "z", "a"]
+      },
+      "estimatedReadTime": 3
+    },
+    {
+      "id": "chapter-18",
+      "number": 18,
+      "title": "The Forward Pass: From Inputs to Output",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Forward propagation is the journey from inputs to prediction. For a single neuron, this is a two-step process. Step 1: compute the pre-activation value z by taking a weighted sum of inputs plus bias. Step 2: apply the activation function σ to get the final output a. Every training step, every prediction, every neuron evaluation repeats this forward pass."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Forward pass equations:\n\nz = w₁*x₁ + w₂*x₂ + b     (pre-activation)\na = σ(z)                    (post-activation)\n\nFor our neuron:\n  Inputs: x₁, x₂ (fixed data points)\n  Parameters: w₁, w₂, b (learnable)\n  Output: a (neuron's prediction)"
+          }
+        },
+        {
+          "type": "text",
+          "content": "Why two stages? The weighted sum (z) lets the neuron weight different inputs differently - w₁ controls how much x₁ matters, w₂ controls x₂, and b provides an offset. But z is still linear. The activation function (σ) adds non-linearity, allowing the neuron to output curves instead of straight lines, probabilities instead of arbitrary real numbers, and complex patterns instead of simple hyperplanes."
+        },
+        {
+          "type": "highlight",
+          "content": "The pre-activation z can be any real number (-∞ to +∞), but the post-activation a is constrained by the activation function. Sigmoid outputs [0,1], tanh outputs [-1,1], ReLU outputs [0,∞)."
+        },
+        {
+          "type": "text",
+          "content": "In multi-layer networks, one neuron's output a becomes the next layer's input x. The forward pass chains together: layer 1 computes a₁ = σ(z₁), layer 2 uses a₁ as input to compute a₂ = σ(z₂), and so on. This is why they're called \"feed-forward\" networks - information flows forward from inputs through layers to outputs."
+        },
+        {
+          "type": "visual-reference",
+          "content": "Watch the Neuron Architecture diagram during training. Notice how z changes as weights update, and how a responds to changes in z based on the current activation function. The edge colors (blue/red) show weight signs, and edge thickness shows magnitude."
+        },
+        {
+          "type": "callout",
+          "calloutType": "info",
+          "content": "The Neuron Metrics panel shows z and a for the current step. Try different cases and watch how these values evolve differently depending on activation function choice."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["Neuron Architecture", "Neuron Metrics"],
+        "focusMetrics": ["z", "a", "w₁", "w₂", "b"]
+      },
+      "estimatedReadTime": 3
+    },
+    {
+      "id": "chapter-19",
+      "number": 19,
+      "title": "Activation Functions: The Source of Non-Linearity",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Activation functions are the gatekeepers of neural network expressiveness. Without them, stacking layers just creates deeper linear transformations - mathematically equivalent to a single layer. With activation functions, each layer can learn non-linear features, allowing networks to approximate arbitrarily complex functions. But not all activation functions are created equal."
+        },
+        {
+          "type": "highlight",
+          "content": "Sigmoid: σ(z) = 1/(1 + e⁻ᶻ). Outputs [0,1]. Smooth, differentiable everywhere. Historically popular for output layers in binary classification. Problem: saturates (flat regions) when |z| is large, causing vanishing gradients."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Sigmoid activation:\n\nσ(z) = 1 / (1 + e^(-z))\nσ'(z) = σ(z) * (1 - σ(z))\n\nProperties:\n• Range: (0, 1)\n• Derivative: max at z=0 (σ'(0) = 0.25), approaches 0 as |z| → ∞\n• Saturates at both extremes"
+          }
+        },
+        {
+          "type": "highlight",
+          "content": "ReLU: ReLU(z) = max(0, z). Outputs [0,∞). Fast to compute, no saturation for positive z. Default choice for hidden layers in modern deep networks. Problem: 'dies' (outputs 0 forever) if z becomes negative and stays negative."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "ReLU activation:\n\nReLU(z) = max(0, z)\nReLU'(z) = { 1 if z > 0, 0 if z ≤ 0 }\n\nProperties:\n• Range: [0, ∞)\n• Derivative: constant 1 for positive z, 0 for negative z\n• Only saturates in negative region"
+          }
+        },
+        {
+          "type": "highlight",
+          "content": "Tanh: tanh(z) = (e^z - e^(-z))/(e^z + e^(-z)). Outputs [-1,1]. Similar shape to sigmoid but zero-centered, which can help with training dynamics. Like sigmoid, saturates at both extremes."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Tanh activation:\n\ntanh(z) = (e^z - e^(-z)) / (e^z + e^(-z))\ntanh'(z) = 1 - tanh²(z)\n\nProperties:\n• Range: (-1, 1)\n• Derivative: max at z=0 (tanh'(0) = 1), approaches 0 as |z| → ∞\n• Zero-centered (unlike sigmoid)"
+          }
+        },
+        {
+          "type": "visual-reference",
+          "content": "Look at the Activation Function visualization. The top panel shows the function itself: how z maps to a. The bottom panel shows the derivative σ'(z): how sensitive a is to changes in z. Red zones in the derivative panel indicate saturation regions."
+        },
+        {
+          "type": "callout",
+          "calloutType": "tip",
+          "content": "Compare cases: 'Sigmoid Optimal', 'ReLU Optimal', 'Tanh Optimal'. Notice how the activation curves differ and how each function's derivative behaves differently."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["Activation Function"],
+        "focusMetrics": ["σ(z)", "σ'(z)"]
+      },
+      "estimatedReadTime": 4
+    },
+    {
+      "id": "chapter-20",
+      "number": 20,
+      "title": "Backpropagation: The Chain Rule in Action",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Learning requires computing gradients: how much does changing each parameter change the loss? For a neuron, we need ∂L/∂w₁, ∂L/∂w₂, and ∂L/∂b. But the relationship is indirect - parameters affect z, which affects a, which affects loss. The chain rule from calculus lets us decompose this indirect relationship into a product of direct relationships."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Chain rule for gradients:\n\n∂L/∂w₁ = ∂L/∂a × ∂a/∂z × ∂z/∂w₁\n        = ∂L/∂a × σ'(z) × x₁\n\n∂L/∂w₂ = ∂L/∂a × ∂a/∂z × ∂z/∂w₂\n        = ∂L/∂a × σ'(z) × x₂\n\n∂L/∂b  = ∂L/∂a × ∂a/∂z × ∂z/∂b\n        = ∂L/∂a × σ'(z) × 1"
+          }
+        },
+        {
+          "type": "text",
+          "content": "Breaking down the chain: ∂L/∂a comes from the loss function and tells us how the loss changes as the neuron's output changes. ∂a/∂z = σ'(z) is the local derivative - the slope of the activation function at the current z value. ∂z/∂w₁ = x₁ (and similarly for w₂ and b) tells us how the pre-activation changes with each parameter."
+        },
+        {
+          "type": "highlight",
+          "content": "The middle term σ'(z) is critical. When it's large (steep activation), gradients flow well. When it's small (flat activation, saturation), gradients vanish and learning stalls."
+        },
+        {
+          "type": "text",
+          "content": "Backpropagation generalizes this to deep networks. In a multi-layer network, you start at the output layer and work backwards, multiplying derivatives layer by layer using the chain rule. This is why it's called \"back\" propagation - you propagate gradients backwards from loss to early layers."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Gradient descent update:\n\nw₁_new = w₁_old - α * ∂L/∂w₁\nw₂_new = w₂_old - α * ∂L/∂w₂\nb_new  = b_old  - α * ∂L/∂b\n\nwhere α is the learning rate"
+          }
+        },
+        {
+          "type": "visual-reference",
+          "content": "The Chain Rule Breakdown panel shows the three terms of the chain rule for each parameter. Colors indicate magnitude: green (healthy gradients), yellow (moderate), red (vanishing). Watch how these values change as training progresses."
+        },
+        {
+          "type": "callout",
+          "calloutType": "info",
+          "content": "Try 'Sigmoid Vanishing' and watch the Chain Rule Breakdown. When the neuron saturates, ∂a/∂z becomes tiny (red), causing all gradients to vanish."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["Chain Rule Breakdown"],
+        "focusMetrics": ["∂L/∂a", "∂a/∂z", "∂z/∂w₁", "∂z/∂w₂", "∂L/∂w₁", "∂L/∂w₂"]
+      },
+      "estimatedReadTime": 4
+    },
+    {
+      "id": "chapter-21",
+      "number": 21,
+      "title": "The Vanishing Gradient Problem",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Saturation is the silent killer of neural network training. When an activation function enters a flat region (|σ'(z)| ≈ 0), its derivative becomes tiny. Since backpropagation multiplies derivatives via the chain rule, a tiny derivative in one place makes all downstream gradients tiny. For sigmoid and tanh, this happens when |z| is large. For ReLU, it happens when z < 0."
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Saturation threshold:\n\n|σ'(z)| < 0.01  →  neuron is saturated\n\nExamples:\n• Sigmoid: saturates when z < -5 or z > 5\n• Tanh: saturates when |z| > 3\n• ReLU: saturates when z < 0 (outputs 0, σ'(z) = 0)"
+          }
+        },
+        {
+          "type": "text",
+          "content": "Why does saturation happen? During training, if weights become too large, the weighted sum z can reach extreme values. A large positive z pushes sigmoid/tanh to their upper plateaus (output ≈ 1 or 1). A large negative z pushes them to their lower plateaus (output ≈ 0 or -1). In these flat regions, changing z barely changes the output, so σ'(z) ≈ 0."
+        },
+        {
+          "type": "highlight",
+          "content": "When gradients vanish, weight updates become negligible. The neuron stops learning because ∂L/∂w ≈ 0, meaning gradient descent takes tiny steps that don't improve the model."
+        },
+        {
+          "type": "text",
+          "content": "In deep networks, vanishing gradients compound. If layer 10's derivative is 0.1 and layer 9's derivative is 0.1, their product is 0.01. Add layer 8 (×0.1 again) and you get 0.001. After 20 layers of multiplication, gradients become microscopically small. This is why deep networks trained with sigmoid/tanh struggled until ReLU and better initialization techniques emerged."
+        },
+        {
+          "type": "visual-reference",
+          "content": "In the Activation Function panel, the bottom graph shows σ'(z) with red shaded saturation zones where |σ'(z)| < 0.01. When the vertical marker (current z) enters a red zone, you'll see a saturation warning and notice that gradients in the Chain Rule Breakdown turn red."
+        },
+        {
+          "type": "callout",
+          "calloutType": "warning",
+          "content": "Compare 'Sigmoid Vanishing' (severe saturation) with 'ReLU Optimal' (no saturation). Notice how learning speed and gradient magnitudes differ dramatically."
+        },
+        {
+          "type": "callout",
+          "calloutType": "tip",
+          "content": "ReLU avoids saturation for positive z because ReLU'(z) = 1 (constant). But watch 'ReLU Dying' to see what happens when z becomes negative - the neuron 'dies' and stops learning entirely!"
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["Activation Function", "Chain Rule Breakdown"],
+        "focusMetrics": ["σ'(z)", "∂a/∂z", "saturation zone"]
+      },
+      "estimatedReadTime": 4
+    },
+    {
+      "id": "chapter-22",
+      "number": 22,
+      "title": "Reading the Visualizations: A Guide",
+      "sections": [
+        {
+          "type": "text",
+          "content": "Phase 3 shows you the inner workings of a single neuron through four interconnected panels. Each panel reveals a different aspect of how the neuron computes its output and learns from gradients. Together, they tell the complete story of forward propagation, activation transformation, backpropagation, and parameter evolution."
+        },
+        {
+          "type": "highlight",
+          "content": "Neuron Architecture Diagram: Shows the computational graph of the forward pass. Inputs (x₁, x₂) flow through weighted connections (edges) to the summation node (Σ), which computes z. The z value passes through the activation function (σ, ReLU, or tanh), producing output a. Edge colors indicate weight signs: blue = positive, red = negative. Edge thickness indicates weight magnitude."
+        },
+        {
+          "type": "highlight",
+          "content": "Activation Function Panel: Two graphs stacked vertically. Top: the activation function itself, showing how z (horizontal axis) maps to a (vertical axis). Bottom: the derivative σ'(z), showing the slope of the activation function. A vertical line marks the current z value, with circles showing where you are on each curve. Red shaded zones indicate saturation regions where |σ'(z)| < 0.01."
+        },
+        {
+          "type": "highlight",
+          "content": "Chain Rule Breakdown Panel: Shows the three components of each parameter's gradient. For w₁: ∂L/∂a (how loss depends on output), ∂a/∂z (activation slope), ∂z/∂w₁ (input value). The product ∂L/∂w₁ is shown on the right. Colors indicate magnitude: green = healthy (|gradient| > 0.1), yellow = moderate (0.01-0.1), red = vanishing (< 0.01)."
+        },
+        {
+          "type": "highlight",
+          "content": "Neuron Metrics Panel: Displays current parameter values (w₁, w₂, b) alongside initial and final values. Shows loss progress, parameter changes (Δw₁, Δw₂, Δb), and training progress percentage. The progress bar gives context: are we at the beginning, middle, or end of training?"
+        },
+        {
+          "type": "text",
+          "content": "How to use these together: Start with Neuron Metrics to see current parameter values. Watch Neuron Architecture to see how these parameters create weighted connections. Check Activation Function to see whether you're in a saturated region. Look at Chain Rule Breakdown to diagnose gradient health. If gradients are tiny (red), check if σ'(z) is tiny in the Activation panel - that's saturation!"
+        },
+        {
+          "type": "visual-reference",
+          "content": "Use playback controls to watch training unfold. Play (▶) runs automatically. Step forward/backward (→/←) lets you examine individual steps. The slider jumps to any step. Reset returns to step 0. Try pausing when interesting things happen - like when a neuron enters or exits saturation."
+        },
+        {
+          "type": "callout",
+          "calloutType": "tip",
+          "content": "Use the case dropdown to explore different scenarios: optimal learning, vanishing gradients, dying ReLU, activation function comparisons, and learning rate interactions with saturation."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": ["All panels"],
+        "focusMetrics": ["All metrics"]
+      },
+      "estimatedReadTime": 4
+    },
+    {
+      "id": "chapter-23",
+      "number": 23,
+      "title": "Practical Implications & Deep Learning Connections",
+      "sections": [
+        {
+          "type": "text",
+          "content": "The lessons from this single-neuron visualization scale to entire networks. Modern deep learning architectures - CNNs, transformers, diffusion models - all build on these fundamentals. Every neuron performs the same two-step computation (weighted sum, then activation). Every layer backpropagates gradients using the chain rule. And saturation remains a critical concern even in state-of-the-art models."
+        },
+        {
+          "type": "highlight",
+          "content": "Activation function choice matters: Use ReLU (or variants like Leaky ReLU, GELU) for hidden layers in deep networks to avoid vanishing gradients. Use sigmoid for binary classification output layers. Use softmax (generalized sigmoid) for multi-class classification outputs."
+        },
+        {
+          "type": "text",
+          "content": "Why ReLU won: Before ReLU, deep networks trained with sigmoid/tanh struggled. Gradients vanished in deep layers, making training slow or impossible. ReLU's constant derivative (1 for positive z) lets gradients flow unchanged through many layers. This single change enabled training of much deeper networks, fueling the deep learning revolution."
+        },
+        {
+          "type": "highlight",
+          "content": "The dying ReLU problem: When a ReLU neuron's inputs consistently produce negative z, it outputs 0 forever and stops learning (gradient is 0). Solutions: use Leaky ReLU (small negative slope), careful weight initialization (avoid starting with large negative z), or adaptive learning rates that prevent extreme weight values."
+        },
+        {
+          "type": "text",
+          "content": "Beyond basic activations: Modern networks use variants optimized for specific tasks. Swish/SiLU (x * sigmoid(x)) provides smooth non-linearity. GELU (used in transformers like GPT) has probabilistic interpretation. ELU has smooth gradients for negative values. PReLU learns the negative slope as a parameter. Experimentation continues - the perfect activation function may not exist!"
+        },
+        {
+          "type": "code",
+          "code": {
+            "language": "math",
+            "snippet": "Modern activation variants:\n\nLeaky ReLU(z) = max(0.01*z, z)\nGELU(z) ≈ z * Φ(z)  where Φ is Gaussian CDF\nSwish(z) = z * σ(z)\nELU(z) = { z if z > 0, α(e^z - 1) if z ≤ 0 }"
+          }
+        },
+        {
+          "type": "text",
+          "content": "From single neuron to deep networks: In a multi-layer network, each layer contains many neurons. Layer outputs become next layer's inputs. Gradients backpropagate through all layers. But the core computation - the single neuron you've been visualizing - remains unchanged. Understanding one neuron deeply means understanding the building block of all neural networks."
+        },
+        {
+          "type": "callout",
+          "calloutType": "info",
+          "content": "Weight initialization matters too! Poor initialization can cause early saturation before training even begins. Modern techniques (Xavier, He initialization) ensure initial z values stay in healthy ranges."
+        },
+        {
+          "type": "callout",
+          "calloutType": "tip",
+          "content": "Explore the 'Activation Comparison' case to see sigmoid, ReLU, and tanh side-by-side. Notice how they handle the same inputs differently and how saturation affects each."
+        }
+      ],
+      "visualCues": {
+        "highlightElements": [],
+        "focusMetrics": []
+      },
+      "estimatedReadTime": 4
+    }
+  ]
+}

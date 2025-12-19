@@ -132,7 +132,7 @@
         class="glossary-content"
         transition:slide={{ duration: 200, easing: cubicOut }}
       >
-        <p class="definition">{content()}</p>
+        <p class="definition">{content}</p>
 
         {#if entry.formula}
           <div class="formula">
