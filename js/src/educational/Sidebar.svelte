@@ -44,19 +44,15 @@
   // Filter glossary terms
   const filteredGlossaryTerms = $derived(() => {
     const query = searchQuery.toLowerCase();
-    const userLevel = educationalState.state.userLevel;
 
     return Object.entries(glossary).filter(([_, entry]) => {
-      // Filter by level
-      const levelMatch = entry.level.includes(userLevel) || entry.level.includes('all');
-
-      // Filter by search
+      // Filter by search only (show all levels)
       const searchMatch = !query ||
         entry.term.toLowerCase().includes(query) ||
         entry.brief.toLowerCase().includes(query) ||
         entry.detailed.toLowerCase().includes(query);
 
-      return levelMatch && searchMatch;
+      return searchMatch;
     });
   });
 </script>
@@ -183,7 +179,7 @@
       {:else}
         <QAAccordion
           categories={faqs.categories}
-          filterByLevel={true}
+          filterByLevel={false}
           searchQuery={searchQuery}
         />
       {/if}

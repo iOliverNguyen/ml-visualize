@@ -1,7 +1,7 @@
 <script lang="ts">
   interface Props {
-    currentPhase: 'phase1' | 'phase2';
-    onchange: (phase: 'phase1' | 'phase2') => void;
+    currentPhase: 'phase1' | 'phase2' | 'phase3';
+    onchange: (phase: 'phase1' | 'phase2' | 'phase3') => void;
   }
 
   let { currentPhase, onchange }: Props = $props();
@@ -31,6 +31,19 @@
     <div class="phase-info">
       <span class="phase-name">Phase 2</span>
       <span class="phase-desc">2-Parameter: y = w₁·x₁ + w₂·x₂</span>
+    </div>
+  </button>
+
+  <button
+    class="phase-tab"
+    class:active={currentPhase === 'phase3'}
+    onclick={() => onchange('phase3')}
+    type="button"
+  >
+    <span class="phase-emoji">🧠</span>
+    <div class="phase-info">
+      <span class="phase-name">Phase 3</span>
+      <span class="phase-desc">Neuron: z = w·x + b, a = σ(z)</span>
     </div>
   </button>
 </div>

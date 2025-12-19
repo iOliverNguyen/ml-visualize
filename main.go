@@ -7,6 +7,7 @@ import (
 
 	core "github.com/iOliverNguyen/ml-viz/go"
 	"github.com/iOliverNguyen/ml-viz/go/linear"
+	"github.com/iOliverNguyen/ml-viz/go/neuron"
 )
 
 func main() {
@@ -14,7 +15,19 @@ func main() {
 	flag.BoolVar(server, "s", false, "Start HTTP server after training (shorthand)")
 	generateCases := flag.Bool("generate-cases", false, "Generate pre-computed Phase 1 training cases")
 	generateCases2 := flag.Bool("generate-cases-phase2", false, "Generate pre-computed Phase 2 training cases")
+	generateCases3 := flag.Bool("generate-cases-phase3", false, "Generate pre-computed Phase 3 training cases")
 	flag.Parse()
+
+	// Check if generate-cases-phase3 command was requested
+	if *generateCases3 {
+		fmt.Println("Generating Phase 3 pre-computed training cases...")
+		outputDir := "js/public/cases-phase3"
+		if err := neuron.GenerateAllCases(outputDir); err != nil {
+			log.Fatalf("Failed to generate Phase 3 cases: %v", err)
+		}
+		fmt.Println("✓ Phase 3 cases generated successfully!")
+		return
+	}
 
 	// Check if generate-cases-phase2 command was requested
 	if *generateCases2 {

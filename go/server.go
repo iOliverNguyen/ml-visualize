@@ -1,5 +1,19 @@
 package core
 
+// DEPRECATED: This server is no longer needed for the frontend.
+// The frontend now runs training client-side using JavaScript (see /js/src/shared/training.ts).
+// This file is kept for reference and potential future API needs.
+//
+// To run the frontend without this server:
+//   cd js && pnpm dev
+//
+// The server is only needed if you want to use the API endpoints:
+//   - GET  /api/snapshots        - Load pre-computed snapshots from file
+//   - POST /api/dataset/random   - Generate random data + train on-the-fly
+//   - POST /api/dataset/custom   - Train with user-provided custom data
+//
+// However, the frontend now has equivalent functionality client-side.
+
 import (
 	"encoding/json"
 	"log"

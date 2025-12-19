@@ -1,5 +1,11 @@
 <script lang="ts">
   import type { DataPoint } from './types';
+  import {
+    trainModel,
+    generateRandomData as generateData,
+    validateDataset,
+    type DataPoint as TrainingDataPoint
+  } from '../shared/training';
 
   interface Props {
     onDatasetChange: (snapshots: any[], config?: any) => void;
@@ -50,39 +56,35 @@ return generateData(${numPoints});`);
     error = '';
   }
 
-  async function generateRandomData() {
+  function generateRandomDataAndTrain() {
     error = '';
     isGenerating = true;
 
     try {
-      const response = await fetch('/api/dataset/random', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data_config: {
-            num_points: numPoints,
-            x_min: xMin,
-            x_max: xMax,
-            true_slope: trueSlope,
-            noise_level: noiseLevel,
-            seed: seed || Date.now(),
-          },
-          training_config: {
-            w_init: wInit,
-            lr: learningRate,
-            steps: trainingSteps,
-          },
-        }),
+      // Generate data client-side
+      const actualSeed = seed || Date.now();
+      const data = generateData({
+        numPoints,
+        xMin,
+        xMax,
+        trueSlope,
+        noiseLevel,
+        seed: actualSeed
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to generate data');
+      // Validate data
+      const validationError = validateDataset(data);
+      if (validationError) {
+        throw new Error(validationError);
       }
 
-      const snapshots = await response.json();
+      // Train client-side
+      const snapshots = trainModel({
+        wInit,
+        learningRate,
+        maxSteps: trainingSteps,
+        data
+      });
 
       const config = {
         name: 'Random Data',
@@ -92,7 +94,7 @@ return generateData(${numPoints});`);
           x_max: xMax,
           true_slope: trueSlope,
           noise_level: noiseLevel,
-          seed: seed || Date.now(),
+          seed: actualSeed,
         },
         training_config: {
           w_init: wInit,
@@ -103,17 +105,13 @@ return generateData(${numPoints});`);
 
       onDatasetChange(snapshots, config);
     } catch (e) {
-      if (e instanceof Error && e.message.includes('fetch')) {
-        error = 'Server not running. Start with: go run . --server';
-      } else {
-        error = e instanceof Error ? e.message : 'Failed to generate data';
-      }
+      error = e instanceof Error ? e.message : 'Failed to generate data';
     } finally {
       isGenerating = false;
     }
   }
 
-  async function generateFromFunction() {
+  function generateFromFunction() {
     error = '';
     isGenerating = true;
 
@@ -136,8 +134,8 @@ return generateData(${numPoints});`);
         throw new Error('Function must return at least one data point');
       }
 
-      // Convert to backend format
-      const formattedData = dataPoints.map((point: any, i: number) => {
+      // Convert to training format
+      const formattedData: TrainingDataPoint[] = dataPoints.map((point: any, i: number) => {
         if (typeof point !== 'object' || point === null) {
           throw new Error(`Point ${i} must be an object with x and y properties`);
         }
@@ -145,33 +143,24 @@ return generateData(${numPoints});`);
           throw new Error(`Point ${i} must have numeric x and y values`);
         }
         return {
-          X: point.x,
-          YTrue: point.y,
+          x: point.x,
+          yTrue: point.y,
         };
       });
 
-      // Send to backend for training
-      const response = await fetch('/api/dataset/custom', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: formattedData,
-          config: {
-            w_init: wInit,
-            lr: learningRate,
-            steps: trainingSteps,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to train with custom data');
+      // Validate data
+      const validationError = validateDataset(formattedData);
+      if (validationError) {
+        throw new Error(validationError);
       }
 
-      const snapshots = await response.json();
+      // Train client-side
+      const snapshots = trainModel({
+        wInit,
+        learningRate,
+        maxSteps: trainingSteps,
+        data: formattedData
+      });
 
       const config = {
         name: 'Custom Function',
@@ -188,9 +177,7 @@ return generateData(${numPoints});`);
 
       onDatasetChange(snapshots, config);
     } catch (e) {
-      if (e instanceof Error && e.message.includes('fetch')) {
-        error = 'Server not running. Start with: go run . --server';
-      } else if (e instanceof SyntaxError) {
+      if (e instanceof SyntaxError) {
         error = 'Syntax error in JavaScript code: ' + e.message;
       } else {
         error = e instanceof Error ? e.message : 'Failed to generate data from function';
@@ -370,7 +357,7 @@ return generateData(${numPoints});`);
 
       <button
         class="generate-button"
-        onclick={generateRandomData}
+        onclick={generateRandomDataAndTrain}
         disabled={isGenerating || loading}
         type="button"
       >
