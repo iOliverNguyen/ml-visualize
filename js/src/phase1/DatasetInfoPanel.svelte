@@ -18,7 +18,7 @@
   }: Props = $props();
 
   // Calculate dataset statistics
-  const stats = $derived(() => {
+  const stats = $derived.by(() => {
     if (dataset.length === 0) {
       return {
         numPoints: 0,
@@ -42,7 +42,7 @@
   });
 
   // Calculate progress toward target
-  const progress = $derived(() => {
+  const progress = $derived.by(() => {
     const range = Math.abs(targetW - initialW);
     if (range === 0) return 100;
     const current = Math.abs(currentW - initialW);
@@ -50,7 +50,7 @@
   });
 
   // Determine if we're close to target
-  const isClose = $derived(() => {
+  const isClose = $derived.by(() => {
     return Math.abs(currentW - targetW) < 0.1;
   });
 </script>
@@ -73,20 +73,20 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Dataset</div>
-      <div class="stat-value">{stats().numPoints} points</div>
+      <div class="stat-value">{stats.numPoints} points</div>
     </div>
 
     <div class="stat-card">
       <div class="stat-label">X range</div>
       <div class="stat-value">
-        {stats().xMin.toFixed(1)} → {stats().xMax.toFixed(1)}
+        {stats.xMin.toFixed(1)} → {stats.xMax.toFixed(1)}
       </div>
     </div>
 
     <div class="stat-card">
       <div class="stat-label">Y range</div>
       <div class="stat-value">
-        {stats().yMin.toFixed(1)} → {stats().yMax.toFixed(1)}
+        {stats.yMin.toFixed(1)} → {stats.yMax.toFixed(1)}
       </div>
     </div>
 
@@ -111,9 +111,9 @@
 
     <div class="param-row">
       <span class="param-label">Current w:</span>
-      <span class="param-value current" class:close={isClose()}>
-        {currentW.toFixed(3)}<span class="check-mark-w" class:visible={isClose()}>
-          <span class="check-mark" class:visible={isClose()}>✓</span>
+      <span class="param-value current" class:close={isClose}>
+        {currentW.toFixed(3)}<span class="check-mark-w" class:visible={isClose}>
+          <span class="check-mark" class:visible={isClose}>✓</span>
         </span>
       </span>
     </div>
@@ -122,11 +122,11 @@
       <div class="progress-bar-bg">
         <div
           class="progress-bar-fill"
-          style="width: {progress()}%"
+          style="width: {progress}%"
         ></div>
       </div>
       <div class="progress-label">
-        {progress().toFixed(0)}% to target
+        {progress.toFixed(0)}% to target
       </div>
     </div>
   </div>

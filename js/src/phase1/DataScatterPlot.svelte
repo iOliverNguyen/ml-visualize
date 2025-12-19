@@ -37,7 +37,7 @@
   });
 
   // Calculate data ranges
-  const dataRanges = $derived(() => {
+  const dataRanges = $derived.by(() => {
     if (pointDetails.length === 0) {
       return { xMin: 0, xMax: 10, yMin: 0, yMax: 20 };
     }
@@ -65,18 +65,18 @@
 
   // Scaling functions
   const scaleX = $derived((x: number) => {
-    const range = dataRanges();
+    const range = dataRanges;
     return padding + ((x - range.xMin) / (range.xMax - range.xMin)) * (width - 2 * padding);
   });
 
   const scaleY = $derived((y: number) => {
-    const range = dataRanges();
+    const range = dataRanges;
     return height - padding - ((y - range.yMin) / (range.yMax - range.yMin)) * (height - 2 * padding);
   });
 
   // Calculate fitted line points
-  const fittedLinePoints = $derived(() => {
-    const range = dataRanges();
+  const fittedLinePoints = $derived.by(() => {
+    const range = dataRanges;
     const x1 = range.xMin;
     const y1 = $animatedW * x1;
     const x2 = range.xMax;
@@ -91,16 +91,16 @@
   });
 
   // X-axis ticks
-  const xTicks = $derived(() => {
-    const range = dataRanges();
+  const xTicks = $derived.by(() => {
+    const range = dataRanges;
     const numTicks = 6;
     const step = (range.xMax - range.xMin) / (numTicks - 1);
     return Array.from({ length: numTicks }, (_, i) => range.xMin + i * step);
   });
 
   // Y-axis ticks
-  const yTicks = $derived(() => {
-    const range = dataRanges();
+  const yTicks = $derived.by(() => {
+    const range = dataRanges;
     const numTicks = 6;
     const step = (range.yMax - range.yMin) / (numTicks - 1);
     return Array.from({ length: numTicks }, (_, i) => range.yMin + i * step);
@@ -130,7 +130,7 @@
     />
 
     <!-- X-axis ticks and labels -->
-    {#each xTicks() as tick}
+    {#each xTicks as tick}
       <line
         x1={scaleX(tick)}
         y1={height - padding}
@@ -151,7 +151,7 @@
     {/each}
 
     <!-- Y-axis ticks and labels -->
-    {#each yTicks() as tick}
+    {#each yTicks as tick}
       <line
         x1={padding - 5}
         y1={scaleY(tick)}
@@ -213,10 +213,10 @@
 
     <!-- Fitted line -->
     <line
-      x1={fittedLinePoints().x1}
-      y1={fittedLinePoints().y1}
-      x2={fittedLinePoints().x2}
-      y2={fittedLinePoints().y2}
+      x1={fittedLinePoints.x1}
+      y1={fittedLinePoints.y1}
+      x2={fittedLinePoints.x2}
+      y2={fittedLinePoints.y2}
       stroke="#10b981"
       stroke-width="3"
       opacity="0.8"

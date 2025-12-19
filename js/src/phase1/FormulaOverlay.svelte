@@ -69,7 +69,7 @@
   )
 
   // Select which formula to display based on mode
-  let displayFormula = $derived(() => {
+  let displayFormula = $derived.by(() => {
     if (point && pointFormulas) {
       // Show per-point formula if point is selected
       if (mode === 'loss') return pointFormulas.loss
@@ -84,7 +84,7 @@
     }
   })
 
-  let formula = $derived(displayFormula())
+  let formula = $derived(displayFormula)
 </script>
 
 <div class="formula-overlay">

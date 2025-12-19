@@ -42,15 +42,15 @@
   }
 
   // Filter glossary terms
-  const filteredGlossaryTerms = $derived(() => {
+  const filteredGlossaryTerms = $derived.by(() => {
     const query = searchQuery.toLowerCase();
 
-    return Object.entries(glossary).filter(([_, entry]) => {
+    return Object.entries(glossary ?? {}).filter(([_, entry]) => {
       // Filter by search only (show all levels)
       const searchMatch = !query ||
-        entry.term.toLowerCase().includes(query) ||
-        entry.brief.toLowerCase().includes(query) ||
-        entry.detailed.toLowerCase().includes(query);
+        entry?.term?.toLowerCase().includes(query) ||
+        entry?.brief?.toLowerCase().includes(query) ||
+        entry?.detailed?.toLowerCase().includes(query);
 
       return searchMatch;
     });
@@ -164,21 +164,20 @@
             </div>
           {:else}
             {#each filteredGlossaryTerms() as [termId, entry]}
-              <div class="glossary-item" data-term-id={termId}>
+              <div data-term-id={termId}>
                 <GlossaryTooltip
                   term={entry.term}
                   entry={entry}
                   inline={false}
                   onrelatedClick={handleGlossaryTermClick}
                 />
-                <p class="term-brief">{entry.brief}</p>
               </div>
             {/each}
           {/if}
         </div>
       {:else}
         <QAAccordion
-          categories={faqs.categories}
+          categories={faqs?.categories ?? []}
           filterByLevel={false}
           searchQuery={searchQuery}
         />
@@ -391,27 +390,7 @@
   .glossary-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-  }
-
-  .glossary-item {
-    padding: 1rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    transition: all 0.15s ease;
-  }
-
-  .glossary-item:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-  }
-
-  .term-brief {
-    margin: 0.5rem 0 0 0;
-    font-size: 0.85rem;
-    color: #64748b;
-    line-height: 1.5;
+    gap: 0.75rem;
   }
 
   .empty-state {

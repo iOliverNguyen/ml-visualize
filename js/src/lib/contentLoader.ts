@@ -2,10 +2,12 @@ import type { Glossary, FAQData, TutorialContent } from '../types';
 
 /**
  * Loads the glossary from external JSON file
+ * @param phase - Optional phase identifier (phase1 or phase2)
  */
-export async function loadGlossary(): Promise<Glossary> {
+export async function loadGlossary(phase?: 'phase1' | 'phase2'): Promise<Glossary> {
   try {
-    const response = await fetch('/content/glossary.json');
+    const suffix = phase === 'phase2' ? '-phase2' : '';
+    const response = await fetch(`/content/glossary${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load glossary: ${response.statusText}`);
     }
@@ -18,10 +20,12 @@ export async function loadGlossary(): Promise<Glossary> {
 
 /**
  * Loads FAQs from external JSON file
+ * @param phase - Optional phase identifier (phase1 or phase2)
  */
-export async function loadFAQs(): Promise<FAQData> {
+export async function loadFAQs(phase?: 'phase1' | 'phase2'): Promise<FAQData> {
   try {
-    const response = await fetch('/content/faqs.json');
+    const suffix = phase === 'phase2' ? '-phase2' : '';
+    const response = await fetch(`/content/faqs${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load FAQs: ${response.statusText}`);
     }
@@ -34,10 +38,12 @@ export async function loadFAQs(): Promise<FAQData> {
 
 /**
  * Loads the tutorial from external JSON file
+ * @param phase - Optional phase identifier (phase1 or phase2)
  */
-export async function loadTutorial(): Promise<TutorialContent> {
+export async function loadTutorial(phase?: 'phase1' | 'phase2'): Promise<TutorialContent> {
   try {
-    const response = await fetch('/content/tutorial.json');
+    const suffix = phase === 'phase2' ? '-phase2' : '';
+    const response = await fetch(`/content/tutorial${suffix}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load tutorial: ${response.statusText}`);
     }
@@ -58,12 +64,13 @@ export async function loadTutorial(): Promise<TutorialContent> {
 
 /**
  * Loads all educational content at once
+ * @param phase - Optional phase identifier (phase1 or phase2)
  */
-export async function loadAllContent() {
+export async function loadAllContent(phase?: 'phase1' | 'phase2') {
   const [glossary, faqs, tutorial] = await Promise.all([
-    loadGlossary(),
-    loadFAQs(),
-    loadTutorial()
+    loadGlossary(phase),
+    loadFAQs(phase),
+    loadTutorial(phase)
   ]);
 
   return {

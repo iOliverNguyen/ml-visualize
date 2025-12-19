@@ -19,7 +19,7 @@
   const padding = 30;
 
   // Calculate overall data range across all snapshots
-  const dataRange = $derived(() => {
+  const dataRange = $derived.by(() => {
     const allPoints = [
       ...initialSnapshot.point_details,
       ...currentSnapshot.point_details,
@@ -53,18 +53,18 @@
 
   // Scaling functions (shared across all mini plots)
   function scaleX(x: number) {
-    const range = dataRange();
+    const range = dataRange;
     return padding + ((x - range.xMin) / (range.xMax - range.xMin)) * (width - 2 * padding);
   }
 
   function scaleY(y: number) {
-    const range = dataRange();
+    const range = dataRange;
     return height - padding - ((y - range.yMin) / (range.yMax - range.yMin)) * (height - 2 * padding);
   }
 
   // Helper to generate fitted line path
   function getFittedLine(w: number) {
-    const range = dataRange();
+    const range = dataRange;
     const x1 = range.xMin;
     const y1 = w * x1;
     const x2 = range.xMax;

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { fade, scale } from 'svelte/transition';
+  import { slide } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
+  import { onDestroy } from 'svelte';
   import type { GlossaryEntry } from '../types';
   import * as educationalState from '../stores/educationalState.svelte';
 
@@ -14,45 +15,63 @@
   let {
     term,
     entry,
-    inline = true,
+    inline = false,
     onrelatedClick
   }: Props = $props();
 
-  let isOpen = $state(false);
-  let tooltipElement: HTMLDivElement | null = $state(null);
-  let triggerElement: HTMLSpanElement | null = $state(null);
+  let expanded = $state(false);
+  let isHighlighted = $state(false);
+  let highlightTimeout: ReturnType<typeof setTimeout> | null = null;
 
   function toggle() {
-    isOpen = !isOpen;
-    if (isOpen) {
+    expanded = !expanded;
+    if (expanded) {
       educationalState.state.activeGlossaryTerm = term;
     } else {
       educationalState.state.activeGlossaryTerm = null;
     }
   }
 
-  function close() {
-    isOpen = false;
-    educationalState.state.activeGlossaryTerm = null;
-  }
-
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       toggle();
-    } else if (e.key === 'Escape' && isOpen) {
-      e.preventDefault();
-      close();
     }
   }
 
   function handleRelatedClick(relatedTermId: string) {
-    close();
     onrelatedClick?.(relatedTermId);
   }
 
+  // Watch for external activation via related term clicks
+  $effect(() => {
+    const activeTermFromState = educationalState.state.activeGlossaryTerm;
+
+    // If this term was activated externally (e.g., from related link)
+    if (activeTermFromState === term && !expanded) {
+      // Auto-expand
+      expanded = true;
+
+      // Trigger highlight
+      isHighlighted = true;
+
+      // Clear any existing timeout
+      if (highlightTimeout) clearTimeout(highlightTimeout);
+
+      // Remove highlight after 2.5 seconds
+      highlightTimeout = setTimeout(() => {
+        isHighlighted = false;
+      }, 2500);
+    }
+  });
+
+  // Cleanup timeout on component unmount
+  onDestroy(() => {
+    if (highlightTimeout) clearTimeout(highlightTimeout);
+  });
+
   // Get content based on user level
-  const content = $derived(() => {
+  const content = $derived.by(() => {
     const level = educationalState.state.userLevel;
     if (level === 'advanced' && entry.comprehensive) {
       return entry.comprehensive;
@@ -62,74 +81,57 @@
       return entry.brief;
     }
   });
-
-  // Close when clicking outside
-  function handleClickOutside(event: MouseEvent) {
-    if (
-      isOpen &&
-      tooltipElement &&
-      triggerElement &&
-      !tooltipElement.contains(event.target as Node) &&
-      !triggerElement.contains(event.target as Node)
-    ) {
-      close();
-    }
-  }
-
-  $effect(() => {
-    if (isOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => {
-        document.removeEventListener('click', handleClickOutside);
-      };
-    }
-  });
 </script>
 
-<span class="glossary-wrapper" class:inline>
-  <span
-    bind:this={triggerElement}
-    class="glossary-term"
-    class:active={isOpen}
-    onclick={toggle}
-    onkeydown={handleKeyDown}
-    role="button"
-    tabindex="0"
-    aria-expanded={isOpen}
-    aria-haspopup="true"
-    aria-label="Definition for {entry.term}"
-  >
-    {term}
-  </span>
-
-  {#if isOpen}
-    <div
-      bind:this={tooltipElement}
-      class="glossary-tooltip"
-      transition:scale={{ duration: 150, easing: cubicOut, start: 0.95 }}
-      role="dialog"
-      aria-label="Definition of {entry.term}"
+{#if inline}
+  <!-- Inline version for use within text -->
+  <span class="glossary-inline">
+    <button
+      class="glossary-term-inline"
+      onclick={toggle}
+      onkeydown={handleKeyDown}
+      aria-expanded={expanded}
+      type="button"
     >
-      <div class="tooltip-header">
-        <h4 class="tooltip-title">{entry.term}</h4>
-        <button
-          class="close-button"
-          onclick={close}
-          aria-label="Close definition"
-          type="button"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M12 4L4 12M4 4L12 12"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
+      {term}
+    </button>
+  </span>
+{:else}
+  <!-- Block version for glossary list in sidebar -->
+  <div class="glossary-accordion" class:highlighted={isHighlighted}>
+    <button
+      class="glossary-header"
+      onclick={toggle}
+      onkeydown={handleKeyDown}
+      aria-expanded={expanded}
+      type="button"
+    >
+      <div class="header-content">
+        <h4 class="term-title">{entry.term}</h4>
       </div>
+      <svg
+        class="chevron"
+        class:rotated={expanded}
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+      >
+        <path
+          d="M5 7.5L10 12.5L15 7.5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
 
-      <div class="tooltip-content">
+    {#if expanded}
+      <div
+        class="glossary-content"
+        transition:slide={{ duration: 200, easing: cubicOut }}
+      >
         <p class="definition">{content()}</p>
 
         {#if entry.formula}
@@ -161,28 +163,22 @@
             </div>
           </div>
         {/if}
-
-        <div class="level-indicator">
-          <span class="level-badge" data-level={educationalState.state.userLevel}>
-            {educationalState.state.userLevel} level
-          </span>
-        </div>
       </div>
-    </div>
-  {/if}
-</span>
+    {/if}
+  </div>
+{/if}
 
 <style>
-  .glossary-wrapper {
-    position: relative;
-    display: inline-block;
-  }
-
-  .glossary-wrapper.inline {
+  /* Inline version styles */
+  .glossary-inline {
     display: inline;
   }
 
-  .glossary-term {
+  .glossary-term-inline {
+    display: inline;
+    padding: 0;
+    background: transparent;
+    border: none;
     color: #2563eb;
     text-decoration: underline;
     text-decoration-style: dotted;
@@ -191,94 +187,102 @@
     cursor: pointer;
     transition: all 0.15s ease;
     font-weight: 500;
+    font-size: inherit;
+    font-family: inherit;
   }
 
-  .glossary-term:hover {
+  .glossary-term-inline:hover {
     color: #1d4ed8;
     text-decoration-style: solid;
   }
 
-  .glossary-term:focus {
+  .glossary-term-inline:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
     border-radius: 2px;
   }
 
-  .glossary-term.active {
-    color: #1d4ed8;
-    background: #dbeafe;
-    padding: 0 0.2rem;
-    border-radius: 3px;
-  }
-
-  .glossary-tooltip {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
-    min-width: 300px;
-    max-width: 400px;
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    z-index: 1000;
-    padding: 0;
+  /* Block accordion version styles */
+  .glossary-accordion {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     overflow: hidden;
+    background: white;
+    transition: all 0.15s ease;
   }
 
-  /* Adjust position if near right edge */
-  @media (max-width: 640px) {
-    .glossary-tooltip {
-      left: 50%;
-      transform: translateX(-50%);
-      min-width: 280px;
-      max-width: calc(100vw - 2rem);
+  .glossary-accordion:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .glossary-accordion.highlighted {
+    animation: highlightPulse 2.5s ease-out;
+    border-color: #fbbf24;
+  }
+
+  @keyframes highlightPulse {
+    0% {
+      background: #fef3c7;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+    }
+    100% {
+      background: white;
+      box-shadow: none;
     }
   }
 
-  .tooltip-header {
+  .glossary-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: left;
   }
 
-  .tooltip-title {
+  .glossary-header:hover {
+    background: #f8fafc;
+  }
+
+  .glossary-header:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: -2px;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+  }
+
+  .term-title {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
     color: #0f172a;
+    flex: 1;
   }
 
-  .close-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: transparent;
-    border: none;
+  .chevron {
+    flex-shrink: 0;
     color: #64748b;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.15s ease;
+    transition: transform 0.2s ease;
   }
 
-  .close-button:hover {
-    background: #e2e8f0;
-    color: #334155;
+  .chevron.rotated {
+    transform: rotate(180deg);
   }
 
-  .close-button:focus {
-    outline: 2px solid #3b82f6;
-    outline-offset: 1px;
-  }
-
-  .tooltip-content {
+  .glossary-content {
     padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    background: #fafbfc;
   }
 
   .definition {
@@ -291,7 +295,7 @@
   .formula {
     margin: 0.75rem 0;
     padding: 0.75rem;
-    background: #f8fafc;
+    background: white;
     border-left: 3px solid #3b82f6;
     border-radius: 4px;
   }
@@ -314,7 +318,7 @@
   .example strong {
     display: block;
     margin-bottom: 0.25rem;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #92400e;
@@ -336,7 +340,7 @@
   .related-terms strong {
     display: block;
     margin-bottom: 0.5rem;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #64748b;
@@ -368,39 +372,5 @@
   .related-term-link:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 1px;
-  }
-
-  .level-indicator {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 0.75rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #e2e8f0;
-  }
-
-  .level-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .level-badge[data-level='beginner'] {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .level-badge[data-level='intermediate'] {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .level-badge[data-level='advanced'] {
-    background: #fee2e2;
-    color: #991b1b;
   }
 </style>

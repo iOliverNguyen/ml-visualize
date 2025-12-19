@@ -37,7 +37,7 @@
   });
 
   // Filter cases by category
-  const filteredCases = $derived(() => {
+  const filteredCases = $derived.by(() => {
     if (selectedCategory === 'all') {
       return manifest.cases;
     }
@@ -86,7 +86,10 @@
   </div>
 
   {#if loading}
-    <p class="message">Loading case library...</p>
+    <div class="message">
+      <p>Loading case library...</p>
+      <p class="patience-text">Please wait, this may take up to 15 seconds.</p>
+    </div>
   {:else if error}
     <p class="error">{error}</p>
   {:else}
@@ -126,7 +129,7 @@
     </div>
 
     <div class="cases-grid">
-      {#each filteredCases() as caseConfig (caseConfig.id)}
+      {#each filteredCases as caseConfig (caseConfig.id)}
         <button
           class="case-card"
           class:active={currentCaseId === caseConfig.id}
@@ -256,6 +259,13 @@
     border-radius: 8px;
     color: #0369a1;
     text-align: center;
+  }
+
+  .patience-text {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: #0c326a;
+    font-style: italic;
   }
 
   .error {

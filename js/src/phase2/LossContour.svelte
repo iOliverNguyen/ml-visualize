@@ -202,7 +202,7 @@
   );
 
   // Color legend gradient
-  let legendGradient = $derived(() => {
+  let legendGradient = $derived.by(() => {
     const losses = lossGrid.points.map((p) => p.loss);
     const minLoss = Math.min(...losses);
     const maxLoss = Math.max(...losses);
@@ -216,7 +216,7 @@
   });
 
   // Loss range for legend
-  let lossRange = $derived(() => {
+  let lossRange = $derived.by(() => {
     const losses = lossGrid.points.map((p) => p.loss);
     return {
       min: Math.min(...losses),
@@ -382,9 +382,9 @@
     <!-- Color legend (vertical gradient bar) -->
     <defs>
       <linearGradient id="legend-gradient" x1="0%" y1="100%" x2="0%" y2="0%">
-        {#each legendGradient() as color, i}
+        {#each legendGradient as color, i}
           <stop
-            offset="{(i / (legendGradient().length - 1)) * 100}%"
+            offset="{(i / (legendGradient.length - 1)) * 100}%"
             stop-color={color}
           />
         {/each}
@@ -419,7 +419,7 @@
       fill="#334155"
       dominant-baseline="hanging"
     >
-      {lossRange().max.toFixed(1)}
+      {lossRange.max.toFixed(1)}
     </text>
     <text
       x={width - padding.right + 55}
@@ -428,7 +428,7 @@
       fill="#334155"
       dominant-baseline="baseline"
     >
-      {lossRange().min.toFixed(2)}
+      {lossRange.min.toFixed(2)}
     </text>
     <text
       x={width - padding.right + 55}

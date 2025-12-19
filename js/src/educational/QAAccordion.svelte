@@ -16,20 +16,20 @@
   }: Props = $props();
 
   // Filter questions based on user level and search query
-  const filteredCategories = $derived(() => {
+  const filteredCategories = $derived.by(() => {
     const userLevel = educationalState.state.userLevel;
     const query = searchQuery.toLowerCase();
 
-    return categories.map(category => {
-      let questions = category.questions;
+    return (categories ?? []).map(category => {
+      let questions = category?.questions ?? [];
 
       // Filter by level
       if (filterByLevel) {
         questions = questions.filter(q => {
           if (userLevel === 'beginner') {
-            return q.level === 'beginner';
+            return q?.level === 'beginner';
           } else if (userLevel === 'intermediate') {
-            return q.level === 'beginner' || q.level === 'intermediate';
+            return q?.level === 'beginner' || q?.level === 'intermediate';
           } else {
             return true; // Advanced sees all
           }
@@ -39,9 +39,9 @@
       // Filter by search query
       if (query) {
         questions = questions.filter(q =>
-          q.question.toLowerCase().includes(query) ||
-          q.answer.toLowerCase().includes(query) ||
-          q.tags.some(tag => tag.toLowerCase().includes(query))
+          q?.question?.toLowerCase().includes(query) ||
+          q?.answer?.toLowerCase().includes(query) ||
+          (q?.tags ?? []).some(tag => tag?.toLowerCase().includes(query))
         );
       }
 
@@ -49,7 +49,7 @@
         ...category,
         questions
       };
-    }).filter(category => category.questions.length > 0);
+    }).filter(category => (category?.questions?.length ?? 0) > 0);
   });
 
   function handleExpandChange(questionId: string, expanded: boolean) {
