@@ -1,0 +1,202 @@
+{
+  "categories": [
+    {
+      "name": "Getting Started with Phase 2",
+      "questions": [
+        {
+          "id": "phase1-vs-phase2",
+          "question": "What's different between Phase 1 and Phase 2?",
+          "answer": "Phase 1 had one parameter (w) controlling a line y = w*x. Phase 2 has two parameters (w₁, w₂) controlling y = w₁*x₁ + w₂*x₂. The key difference: optimization now happens in 2D parameter space instead of along a line. You'll see trajectory paths through (w₁, w₂) space, loss surfaces as contour maps, and gradient vectors instead of scalar gradients. Same algorithm, richer visualization - you're seeing the multi-dimensional nature of optimization that extends to neural networks with millions of parameters.",
+          "level": "beginner",
+          "tags": ["overview", "comparison"]
+        },
+        {
+          "id": "why-two-parameters",
+          "question": "Why do we need two parameters?",
+          "answer": "Real-world problems rarely have one feature. House prices depend on both size AND location. Student performance depends on study hours AND sleep. Two parameters let us model these relationships: y = w₁*x₁ + w₂*x₂. Each parameter controls how much one feature influences predictions. This is the simplest form of multivariate regression - the foundation for neural networks that learn thousands of features simultaneously.",
+          "level": "beginner",
+          "tags": ["motivation", "concepts"]
+        },
+        {
+          "id": "what-to-look-first-phase2",
+          "question": "What should I look at first in Phase 2?",
+          "answer": "Start with lr-optimal case and click play. Watch three things: (1) Parameter Space plot - see the trajectory path from (0,0) to the optimal point, (2) Loss Contour plot - notice the circular/elliptical contour lines representing the 'terrain', (3) Metrics panel - watch gradient magnitude decrease as you approach the minimum. After one full run, try lr-large to see zigzag patterns, then anisotropic-hard to see how feature scaling affects convergence. There's no wrong place to start - exploration builds intuition!",
+          "level": "beginner",
+          "tags": ["getting-started", "tutorial"]
+        },
+        {
+          "id": "how-viz-helps",
+          "question": "How does the visualization help me understand optimization?",
+          "answer": "Phase 2 makes the invisible visible. You can't easily picture a 1-million-dimensional neural network loss surface, but you can see a 2D one. The trajectories show why high learning rates cause zigzag patterns. The contour plots reveal why some problems converge faster than others (circular vs elliptical surfaces). The gradient field shows 'downhill direction' everywhere in parameter space. These 2D intuitions transfer directly to deep learning - same principles, just more dimensions.",
+          "level": "beginner",
+          "tags": ["visualization", "intuition"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding Parameter Space",
+      "questions": [
+        {
+          "id": "what-is-parameter-space",
+          "question": "What is parameter space?",
+          "answer": "Parameter space is the mathematical playground where optimization happens. Each point (w₁, w₂) represents one possible model configuration. The trajectory shows your journey through this space during training. You start at origin (0, 0) and travel toward the optimal point where loss is lowest. Think of it like a GPS map - your current position is marked, and you're navigating toward the destination using gradient descent as your guidance system.",
+          "level": "beginner",
+          "tags": ["parameter-space", "concepts"]
+        },
+        {
+          "id": "trajectory-meaning",
+          "question": "What does the trajectory show?",
+          "answer": "The trajectory is the path your parameters take during training. Each point on the path represents parameter values at one training step. A smooth, direct path (like lr-optimal) means efficient convergence. A zigzag path (like lr-large or anisotropic-hard) means overshooting and inefficiency. The shape tells a story: straight means isotropic surface with good learning rate, curved means navigating around anisotropic valleys, spiraling means learning rate too high. Every trajectory has a personality!",
+          "level": "intermediate",
+          "tags": ["trajectory", "visualization"]
+        },
+        {
+          "id": "path-not-straight",
+          "question": "Why isn't the path always straight to the minimum?",
+          "answer": "Two main reasons: (1) Anisotropy - when features have different scales (x₁ in range 0-1, x₂ in range 0-100), the loss surface becomes elliptical instead of circular. Gradient descent follows the steepest slope, which might not point directly at the minimum. Result: curved or zigzag paths. (2) High learning rate - too-big steps cause overshooting. You jump past the minimum and have to backtrack, creating oscillations. Compare lr-optimal (smooth) vs lr-large (zigzag) to see this effect. Feature scaling fixes (1), reducing learning rate fixes (2).",
+          "level": "intermediate",
+          "tags": ["trajectory", "anisotropy", "learning-rate"]
+        },
+        {
+          "id": "markers-meaning",
+          "question": "What do the start/current/end markers represent?",
+          "answer": "Start marker (green): Initial parameters at step 0, typically (0, 0). This is where optimization begins. Current marker (red): Your current position as you step through training. Watch it move along the trajectory. End marker (blue): Final parameters after convergence - the optimal (w₁*, w₂*) that minimize loss. The path from green → red → blue shows the complete optimization journey. Distance from current to end shows how far you have left to go.",
+          "level": "beginner",
+          "tags": ["visualization", "ui"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding the Loss Surface",
+      "questions": [
+        {
+          "id": "contour-lines-meaning",
+          "question": "What do the contour lines represent?",
+          "answer": "Contour lines connect points with equal loss, like elevation lines on a topographic map. Each line represents one loss value. Lines close together mean steep terrain (loss changes rapidly). Lines far apart mean gentle slopes. Circular contours mean isotropic surface - loss depends equally on both parameters. Elliptical contours mean anisotropic surface - loss is more sensitive to one parameter than the other. The center of the circles/ellipses is the minimum - your destination. Compare lr-optimal (circular) vs anisotropic-hard (narrow ellipses) to see the difference.",
+          "level": "beginner",
+          "tags": ["loss-surface", "contours", "visualization"]
+        },
+        {
+          "id": "circular-vs-elliptical",
+          "question": "Why are some contours circular and others elliptical?",
+          "answer": "This reveals the geometry of your problem. Circular contours (isotropic surface) mean both parameters have similar influence and scale. Gradient descent can move efficiently in any direction - see lr-optimal case. Elliptical contours (anisotropic surface) mean parameters have mismatched scales. One parameter needs larger changes than the other to affect loss equally. Result: gradient points across the valley instead of down it, causing zigzag motion. See anisotropic-hard case - narrow ellipses create a 'bowling alley' valley that's hard to navigate. Solution: feature scaling to normalize input ranges.",
+          "level": "intermediate",
+          "tags": ["loss-surface", "anisotropy", "geometry"]
+        },
+        {
+          "id": "loss-surface-computed",
+          "question": "How is the loss surface computed?",
+          "answer": "The loss surface L(w₁, w₂) is computed by: (1) Pick a grid of (w₁, w₂) values spanning the region of interest, (2) For each grid point, compute predictions ŷᵢ = w₁*x₁ᵢ + w₂*x₂ᵢ for all data points, (3) Calculate loss L = mean((ŷᵢ - yᵢ)²) for that parameter configuration, (4) Color-code each grid point by its loss value. This creates the heatmap/contour visualization. The trajectory shows where gradient descent actually goes - only one path through this entire surface. The surface exists mathematically for all possible parameter values.",
+          "level": "advanced",
+          "tags": ["loss-surface", "computation", "math"]
+        },
+        {
+          "id": "heatmap-vs-contour",
+          "question": "What's the difference between a heatmap and contour plot?",
+          "answer": "Both show the same loss surface, just differently. Heatmap uses continuous color gradient (blue=low, red=high) to show loss at every point - good for seeing overall shape and identifying regions. Contour plot draws specific loss value lines (like 1.0, 2.0, 3.0) - good for seeing topology and gradients. Heatmap is intuitive ('stay in blue zones'), contours are precise ('I'm on the loss=5.0 line'). Many visualizations combine both: colored background heatmap with contour lines overlaid. Use whichever helps you understand the terrain better!",
+          "level": "beginner",
+          "tags": ["visualization", "comparison"]
+        }
+      ]
+    },
+    {
+      "name": "Understanding Gradient Vectors",
+      "questions": [
+        {
+          "id": "why-two-gradients",
+          "question": "Why are there two gradients now?",
+          "answer": "Because you have two parameters! The gradient vector is ∇L = [∂L/∂w₁, ∂L/∂w₂]. First component (∂L/∂w₁) tells you how loss changes when w₁ increases - should we increase or decrease w₁? Second component (∂L/∂w₂) tells you the same for w₂. Together they form a 2D vector pointing uphill in parameter space. Phase 1 had one gradient (scalar). Phase 2 has gradient vector. Neural networks have gradient tensor with millions of components. Same concept, different dimensions.",
+          "level": "beginner",
+          "tags": ["gradient", "vectors"]
+        },
+        {
+          "id": "magnitude-direction",
+          "question": "What is gradient magnitude and direction?",
+          "answer": "Gradient magnitude ||∇L|| = √(grad_w1² + grad_w2²) measures steepness - how fast loss changes. Large magnitude means steep slope (far from minimum), small magnitude means gentle slope (near minimum). Gradient direction ∠∇L is the angle of the gradient vector - which way is uphill? Together: magnitude says 'how steep', direction says 'which way'. At step 0 of lr-optimal, ||∇L|| = 72.08 (steep!). At step 50, ||∇L|| = 1.0 (gentle). Direction rotates as you navigate the loss surface. Watch both metrics to understand optimization progress.",
+          "level": "intermediate",
+          "tags": ["gradient", "metrics", "vectors"]
+        },
+        {
+          "id": "gradient-field-meaning",
+          "question": "How do I interpret the gradient field arrows?",
+          "answer": "The gradient field shows -∇L (negative gradient) at every point in parameter space. Each arrow points downhill from that location. Long arrows mean steep slopes, short arrows mean gentle. The arrows create a 'flow field' - imagine water flowing downhill along these arrows, naturally converging to the minimum. Your trajectory follows these arrows (scaled by learning rate). If arrows point inward toward center: convex surface with unique minimum. If arrows are parallel: flat region. The gradient field reveals the entire loss topology at a glance.",
+          "level": "intermediate",
+          "tags": ["gradient-field", "visualization"]
+        },
+        {
+          "id": "gradient-uphill-why",
+          "question": "Why does the gradient point uphill if we want to go downhill?",
+          "answer": "By mathematical definition, gradient ∇L points in direction of steepest increase - uphill. That's why update rule has minus sign: w_new = w_old - α*∇L. Subtracting the gradient makes us go opposite direction - downhill. If ∇L = [+5, -3], we move [-5, +3] (decrease w₁, increase w₂). The gradient field visualization already shows -∇L (negative gradient) so arrows point downhill. Bottom line: gradient is uphill, minus gradient is downhill, we follow minus gradient.",
+          "level": "beginner",
+          "tags": ["gradient", "math", "direction"]
+        }
+      ]
+    },
+    {
+      "name": "Advanced Topics",
+      "questions": [
+        {
+          "id": "anisotropy-explained",
+          "question": "What is anisotropy and why does it matter?",
+          "answer": "Anisotropy means directional dependence - loss surface is shaped differently in different directions. Mathematically happens when features have mismatched scales. If x₁ ranges 0-1 and x₂ ranges 0-100, then w₂ needs to be ~100× smaller than w₁ for similar influence. Result: loss surface becomes an elongated ellipse (valley) instead of a circle. Gradient descent struggles: gradient points across the valley instead of down it, causing zigzag motion. See anisotropic-hard case - elongated contours create narrow valley that's hard to navigate. Solution: feature scaling (normalize both features to similar ranges). Neural networks use batch normalization for the same reason.",
+          "level": "advanced",
+          "tags": ["anisotropy", "theory", "feature-scaling"]
+        },
+        {
+          "id": "feature-scaling-effect",
+          "question": "How does feature scaling affect optimization?",
+          "answer": "Feature scaling transforms input features to similar ranges (e.g., mean 0, std 1). Effect on optimization: transforms elliptical loss surface into circular one - isotropic instead of anisotropic. Why this helps: gradients point toward minimum instead of across valleys. Trajectories become direct instead of zigzag. Convergence is faster and more stable. Compare anisotropic-hard (no scaling, narrow ellipses, 200+ steps) vs lr-optimal (scaled features, circular contours, 100 steps). Takeaway: always normalize/standardize your features before training. This is machine learning 101 - seen everywhere from logistic regression to transformers.",
+          "level": "advanced",
+          "tags": ["feature-scaling", "preprocessing", "optimization"]
+        },
+        {
+          "id": "gd-stuck-2d",
+          "question": "Can gradient descent get stuck in 2D?",
+          "answer": "For convex surfaces (like linear regression), no - gradient descent always finds the global minimum. There's only one minimum, and gradient points toward it from everywhere. For non-convex surfaces (like neural networks), yes - can get stuck in local minima (valley that's not the lowest), saddle points (flat in some directions), or plateau regions (gradient near zero). But in practice, this is less problematic than theory suggests. High-dimensional spaces have fewer local minima than you'd expect, and modern optimizers (Adam, momentum) help escape saddle points. Neural networks succeed despite non-convexity.",
+          "level": "intermediate",
+          "tags": ["theory", "convergence", "optimization"]
+        },
+        {
+          "id": "higher-dimensions",
+          "question": "How does this extend to higher dimensions?",
+          "answer": "Everything generalizes naturally. 10 parameters: 10D parameter space, gradient vector with 10 components, update rule w ← w - α*∇L still works. 1 million parameters (typical neural network): same story, just can't visualize. The 2D concepts you're learning - loss surface topology, gradient descent following steepest descent, learning rate controlling step size, anisotropy from feature mismatch - all transfer perfectly to high dimensions. We visualize in 2D because humans can't picture 1M dimensions, but the math and intuition are identical. That's why Phase 2 matters - you're building intuition that applies to modern deep learning.",
+          "level": "advanced",
+          "tags": ["theory", "neural-networks", "scalability"]
+        }
+      ]
+    },
+    {
+      "name": "Troubleshooting",
+      "questions": [
+        {
+          "id": "why-zigzag",
+          "question": "Why does my trajectory zigzag?",
+          "answer": "Two main causes: (1) Learning rate too high - steps are too big, so you overshoot the minimum and bounce back and forth. Compare lr-optimal (smooth) vs lr-large (zigzag). Solution: reduce learning rate by 10×. (2) Anisotropic loss surface - feature scale mismatch creates elongated valleys. Gradient points across valley instead of down it. Compare lr-optimal (circular contours) vs anisotropic-hard (narrow ellipses). Solution: feature scaling to normalize inputs. In zigzag-convergence case, both problems combine for maximum chaos. Takeaway: zigzag = overshooting and/or poor conditioning.",
+          "level": "intermediate",
+          "tags": ["troubleshooting", "trajectory", "zigzag"]
+        },
+        {
+          "id": "slow-convergence",
+          "question": "Why is convergence so slow even with good learning rate?",
+          "answer": "Most likely: anisotropic loss surface from feature scale mismatch. Even with optimal learning rate, gradient descent takes inefficient path along elongated valleys. See anisotropic-hard case - 200+ steps vs 100 for lr-optimal despite similar learning rates. Other causes: (1) Learning rate still too small - try increasing by 3×, (2) Poorly conditioned problem - inherently difficult geometry, (3) Already near convergence - last 1% takes as long as first 99%. Solutions: feature scaling (normalize inputs), adaptive optimizers (Adam adjusts learning rate per parameter), momentum (smooths trajectory). Slow convergence is often fixable with better preprocessing!",
+          "level": "advanced",
+          "tags": ["troubleshooting", "convergence", "performance"]
+        },
+        {
+          "id": "bouncing-minimum",
+          "question": "The trajectory seems to bounce around the minimum.",
+          "answer": "Learning rate is slightly too large. You're in the right neighborhood, but steps are too big to settle into the exact minimum. You circle around it or oscillate back and forth. Look at final 10 steps in lr-large case - parameters fluctuate around optimal values instead of converging smoothly. Solutions: (1) Reduce learning rate by 3-5× once you're close (learning rate decay), (2) Use momentum to dampen oscillations, (3) Use adaptive optimizer (Adam) that automatically reduces step size near minimum. In practice, 'close enough' is often fine - loss is nearly minimal even if parameters haven't perfectly converged.",
+          "level": "intermediate",
+          "tags": ["troubleshooting", "convergence", "learning-rate"]
+        },
+        {
+          "id": "which-case-first",
+          "question": "How do I choose a case to explore first?",
+          "answer": "Start with lr-optimal - it shows gradient descent working beautifully. Smooth trajectory, circular contours, steady loss decrease. This is your baseline. Then try lr-small (too slow) and lr-large (zigzag) to see learning rate effects. Next, anisotropic-easy (mild feature mismatch) and anisotropic-hard (severe mismatch) to understand conditioning. Finally, saddle-point (non-origin start) and zigzag-convergence (worst case scenario). Each case teaches one concept. Going in this order builds intuition systematically. But honestly, there's no wrong choice - exploring any case teaches something valuable!",
+          "level": "beginner",
+          "tags": ["getting-started", "exploration"]
+        }
+      ]
+    }
+  ]
+}

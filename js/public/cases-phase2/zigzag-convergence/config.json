@@ -1,0 +1,28 @@
+{
+  "name": "Zigzag with High LR + Anisotropy",
+  "description": "Combined effect: high learning rate meets anisotropic surface. Maximum zigzag demonstration.",
+  "data_config": {
+    "num_points": 20,
+    "x1_min": 0,
+    "x1_max": 1,
+    "x2_min": 0,
+    "x2_max": 15,
+    "true_w1": 2,
+    "true_w2": 0.8,
+    "noise_level": 0.4,
+    "seed": 42
+  },
+  "training_config": {
+    "w1_init": 3,
+    "w2_init": -1.5,
+    "lr": 0.03,
+    "max_steps": 200
+  },
+  "loss_grid_config": {
+    "w1_min": -1,
+    "w1_max": 4,
+    "w2_min": -1,
+    "w2_max": 4,
+    "resolution": 50
+  }
+}

@@ -49,7 +49,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 0.0,
 				W2Init: 0.0,
 				LR:     0.0001,
-				Steps:  200,
+				MaxSteps: 200,
 			},
 			Insights: []string{
 				"Tiny steps: learning rate = 0.0001",
@@ -78,7 +78,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 0.0,
 				W2Init: 0.0,
 				LR:     0.01,
-				Steps:  100,
+				MaxSteps: 100,
 			},
 			Insights: []string{
 				"Smooth convergence in ~50 steps",
@@ -107,7 +107,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 0.0,
 				W2Init: 0.0,
 				LR:     0.1,
-				Steps:  100,
+				MaxSteps: 100,
 			},
 			Insights: []string{
 				"Overshooting causes zigzag pattern",
@@ -136,7 +136,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 0.0,
 				W2Init: 0.0,
 				LR:     0.01,
-				Steps:  150,
+				MaxSteps: 150,
 			},
 			Insights: []string{
 				"Elliptical contours due to different x1/x2 scales",
@@ -165,7 +165,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 0.0,
 				W2Init: 0.0,
 				LR:     0.008,
-				Steps:  200,
+				MaxSteps: 200,
 			},
 			Insights: []string{
 				"Very elongated ellipse creates narrow valley",
@@ -194,7 +194,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: -1.0,
 				W2Init: -1.0,
 				LR:     0.01,
-				Steps:  150,
+				MaxSteps: 150,
 			},
 			Insights: []string{
 				"Gradient direction changes rapidly",
@@ -223,7 +223,7 @@ func GenerateCases2D(outputDir string) error {
 				W1Init: 3.0,
 				W2Init: -1.5,
 				LR:     0.03,
-				Steps:  200,
+				MaxSteps: 200,
 			},
 			Insights: []string{
 				"Bouncing back and forth dramatically",
@@ -263,6 +263,24 @@ func GenerateCases2D(outputDir string) error {
 	return nil
 }
 
+// CaseConfigJSON represents the minimal config file for client-side training
+type CaseConfigJSON struct {
+	Name           string           `json:"name"`
+	Description    string           `json:"description"`
+	DataConfig     DataGenConfig2D  `json:"data_config"`
+	TrainingConfig TrainingConfig2D `json:"training_config"`
+	LossGridConfig LossGridConfig   `json:"loss_grid_config"`
+}
+
+// LossGridConfig holds parameters for loss grid computation
+type LossGridConfig struct {
+	W1Min      float64 `json:"w1_min"`
+	W1Max      float64 `json:"w1_max"`
+	W2Min      float64 `json:"w2_min"`
+	W2Max      float64 `json:"w2_max"`
+	Resolution int     `json:"resolution"`
+}
+
 func generateCase(outputDir string, caseConfig CaseConfig2D) error {
 	// Create case directory
 	caseDir := filepath.Join(outputDir, caseConfig.ID)
@@ -270,25 +288,25 @@ func generateCase(outputDir string, caseConfig CaseConfig2D) error {
 		return fmt.Errorf("failed to create case directory: %w", err)
 	}
 
-	// Generate dataset
-	data := GenerateRandomData(caseConfig.DataConfig)
-
-	// Run training
-	snapshots := RunTraining(data, caseConfig.TrainConfig)
-
-	// Compute loss grid
-	lossGrid := ComputeLossGrid(data, -1.0, 4.0, -1.0, 4.0, 50)
-
-	// Write snapshots
-	snapshotsPath := filepath.Join(caseDir, "snapshots.json")
-	if err := writeJSON(snapshotsPath, snapshots); err != nil {
-		return fmt.Errorf("failed to write snapshots: %w", err)
+	// Create minimal config file for client-side training
+	config := CaseConfigJSON{
+		Name:           caseConfig.Name,
+		Description:    caseConfig.Description,
+		DataConfig:     caseConfig.DataConfig,
+		TrainingConfig: caseConfig.TrainConfig,
+		LossGridConfig: LossGridConfig{
+			W1Min:      -1.0,
+			W1Max:      4.0,
+			W2Min:      -1.0,
+			W2Max:      4.0,
+			Resolution: 50,
+		},
 	}
 
-	// Write loss grid
-	lossGridPath := filepath.Join(caseDir, "loss_grid.json")
-	if err := writeJSON(lossGridPath, lossGrid); err != nil {
-		return fmt.Errorf("failed to write loss grid: %w", err)
+	// Write config file (~5KB)
+	configPath := filepath.Join(caseDir, "config.json")
+	if err := writeJSON(configPath, config); err != nil {
+		return fmt.Errorf("failed to write config: %w", err)
 	}
 
 	return nil

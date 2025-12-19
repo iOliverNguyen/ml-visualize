@@ -1,0 +1,28 @@
+{
+  "name": "Learning Rate Too Small",
+  "description": "Tiny steps make convergence painfully slow. Watch gradient descent crawl toward the optimum.",
+  "data_config": {
+    "num_points": 20,
+    "x1_min": 0,
+    "x1_max": 5,
+    "x2_min": 0,
+    "x2_max": 5,
+    "true_w1": 2,
+    "true_w2": 1.5,
+    "noise_level": 0.5,
+    "seed": 42
+  },
+  "training_config": {
+    "w1_init": 0,
+    "w2_init": 0,
+    "lr": 0.0001,
+    "max_steps": 200
+  },
+  "loss_grid_config": {
+    "w1_min": -1,
+    "w1_max": 4,
+    "w2_min": -1,
+    "w2_max": 4,
+    "resolution": 50
+  }
+}

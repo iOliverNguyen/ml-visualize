@@ -2,17 +2,17 @@ package linear
 
 // TrainingConfig2D holds configuration for 2-parameter training
 type TrainingConfig2D struct {
-	W1Init float64 `json:"w1_init"`
-	W2Init float64 `json:"w2_init"`
-	LR     float64 `json:"lr"`
-	Steps  int     `json:"steps"`
+	W1Init   float64 `json:"w1_init"`
+	W2Init   float64 `json:"w2_init"`
+	LR       float64 `json:"lr"`
+	MaxSteps int     `json:"max_steps"`
 }
 
 // RunTraining performs gradient descent training and returns snapshots
 func RunTraining(data []DataPoint2D, config TrainingConfig2D) []LinearSnapshot {
 	w1, w2 := config.W1Init, config.W2Init
 	lr := config.LR
-	steps := config.Steps
+	steps := config.MaxSteps
 
 	snapshots := make([]LinearSnapshot, 0, steps)
 

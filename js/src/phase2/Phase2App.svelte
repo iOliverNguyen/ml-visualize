@@ -6,6 +6,11 @@
   import GradientField from './GradientField.svelte';
   import LossContour from './LossContour.svelte';
   import type { LinearSnapshot, LossGrid, LinearMetricsData } from './types';
+  import {
+    trainModel2D,
+    generateRandomData2D,
+    computeLossGrid
+  } from '../shared/training-phase2';
 
   let snapshots = $state<LinearSnapshot[]>([]);
   let lossGrid = $state<LossGrid | null>(null);
@@ -14,6 +19,10 @@
   let intervalId = $state<number | null>(null);
   let loading = $state(true);
   let error = $state('');
+
+  // Progressive rendering states
+  let lossGridReady = $state(false);
+  let snapshotsReady = $state(false);
 
   // Reactive derived values
   let snapshot = $derived(snapshots[currentStep] || null);
@@ -79,23 +88,37 @@
     };
   });
 
-  // Load data on mount
+  // Load data on mount with client-side training
   $effect(() => {
     async function loadData() {
       try {
-        const snapshotsResp = await fetch(
-          '/cases-phase2/lr-optimal/snapshots.json'
-        );
-        if (!snapshotsResp.ok) {
-          throw new Error('Failed to load snapshots');
-        }
-        snapshots = await snapshotsResp.json();
+        loading = true;
+        lossGridReady = false;
+        snapshotsReady = false;
 
-        const gridResp = await fetch('/cases-phase2/lr-optimal/loss_grid.json');
-        if (!gridResp.ok) {
-          throw new Error('Failed to load loss grid');
+        // Fetch only 5KB config file
+        const configResp = await fetch('/cases-phase2/lr-optimal/config.json');
+        if (!configResp.ok) {
+          throw new Error('Failed to load config');
         }
-        lossGrid = await gridResp.json();
+        const config = await configResp.json();
+
+        // Generate training data from config
+        const data = generateRandomData2D(config.data_config);
+
+        // Compute loss grid first (100-150ms) - enables contour visualization
+        lossGrid = computeLossGrid(data, config.loss_grid_config);
+        lossGridReady = true; // LossContour can render now!
+
+        // Train model (50-100ms) - generates trajectory
+        snapshots = trainModel2D({
+          data,
+          w1_init: config.training_config.w1_init,
+          w2_init: config.training_config.w2_init,
+          lr: config.training_config.lr,
+          max_steps: config.training_config.max_steps
+        });
+        snapshotsReady = true; // Trajectory can render now!
 
         loading = false;
       } catch (e) {

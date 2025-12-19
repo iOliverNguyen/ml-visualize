@@ -22,7 +22,7 @@
         "w1_init": 0,
         "w2_init": 0,
         "lr": 0.0001,
-        "steps": 200
+        "max_steps": 200
       },
       "insights": [
         "Tiny steps: learning rate = 0.0001",
@@ -51,7 +51,7 @@
         "w1_init": 0,
         "w2_init": 0,
         "lr": 0.01,
-        "steps": 100
+        "max_steps": 100
       },
       "insights": [
         "Smooth convergence in ~50 steps",
@@ -80,7 +80,7 @@
         "w1_init": 0,
         "w2_init": 0,
         "lr": 0.1,
-        "steps": 100
+        "max_steps": 100
       },
       "insights": [
         "Overshooting causes zigzag pattern",
@@ -109,7 +109,7 @@
         "w1_init": 0,
         "w2_init": 0,
         "lr": 0.01,
-        "steps": 150
+        "max_steps": 150
       },
       "insights": [
         "Elliptical contours due to different x1/x2 scales",
@@ -138,7 +138,7 @@
         "w1_init": 0,
         "w2_init": 0,
         "lr": 0.008,
-        "steps": 200
+        "max_steps": 200
       },
       "insights": [
         "Very elongated ellipse creates narrow valley",
@@ -167,7 +167,7 @@
         "w1_init": -1,
         "w2_init": -1,
         "lr": 0.01,
-        "steps": 150
+        "max_steps": 150
       },
       "insights": [
         "Gradient direction changes rapidly",
@@ -196,7 +196,7 @@
         "w1_init": 3,
         "w2_init": -1.5,
         "lr": 0.03,
-        "steps": 200
+        "max_steps": 200
       },
       "insights": [
         "Bouncing back and forth dramatically",
