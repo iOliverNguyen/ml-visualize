@@ -144,7 +144,7 @@ return generateData(${numPoints});`);
         }
         return {
           x: point.x,
-          yTrue: point.y,
+          y_true: point.y,
         };
       });
 

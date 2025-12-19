@@ -26,34 +26,55 @@
   // Hover state
   let hoveredStep = $state<number | null>(null);
 
-  // Dimensions
-  const width = 800;
-  const height = 800;
+  // Container ref and reactive dimensions
+  let containerRef: HTMLDivElement | null = null;
+  let containerWidth = $state(800);
+  let containerHeight = $state(800);
+
+  const width = $derived(containerWidth);
+  const height = $derived(containerHeight);
   const padding = { left: 60, right: 100, top: 30, bottom: 60 }; // Extra right padding for legend
-  const plotWidth = width - padding.left - padding.right;
-  const plotHeight = height - padding.top - padding.bottom;
+  const plotWidth = $derived(width - padding.left - padding.right);
+  const plotHeight = $derived(height - padding.top - padding.bottom);
+
+  // ResizeObserver to track container size changes
+  $effect(() => {
+    if (!containerRef) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width: w, height: h } = entry.contentRect;
+        containerWidth = w || 800;
+        containerHeight = h || 800;
+      }
+    });
+
+    resizeObserver.observe(containerRef);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  });
 
   // Animated current marker
   const markerX = tweened(0, { duration: 150, easing: cubicOut });
-  const markerY = tweened(0, { duration: 150, easing: cubicOut });
+  const markerY = tweened(0, { duration: 150, easing: cubicOut});
 
-  // Scaling functions
-  function scaleW1(w1: number): number {
-    return (
+  // Reactive scaling functions
+  const scaleW1 = $derived.by(() => {
+    return (w1: number) =>
       padding.left +
       ((w1 - lossGrid.w1_min) / (lossGrid.w1_max - lossGrid.w1_min)) *
-        plotWidth
-    );
-  }
+        plotWidth;
+  });
 
-  function scaleW2(w2: number): number {
-    return (
+  const scaleW2 = $derived.by(() => {
+    return (w2: number) =>
       height -
       padding.bottom -
       ((w2 - lossGrid.w2_min) / (lossGrid.w2_max - lossGrid.w2_min)) *
-        plotHeight
-    );
-  }
+        plotHeight;
+  });
 
   // Color mapping function
   function lossToColor(
@@ -104,9 +125,11 @@
     const ctx = canvasRef.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas resolution
-    canvasRef.width = plotWidth;
-    canvasRef.height = plotHeight;
+    // Set canvas resolution to match display size with DPR
+    const dpr = window.devicePixelRatio || 1;
+    canvasRef.width = plotWidth * dpr;
+    canvasRef.height = plotHeight * dpr;
+    ctx.scale(dpr, dpr);
 
     // Find loss range
     const losses = lossGrid.points.map((p) => p.loss);
@@ -154,9 +177,11 @@
     renderHeatmap();
   });
 
-  // Re-render when colorScale changes
+  // Re-render when colorScale or dimensions change
   $effect(() => {
     colorScale; // Track dependency
+    plotWidth; // Track dimension changes
+    plotHeight; // Track dimension changes
     renderHeatmap();
   });
 
@@ -218,7 +243,7 @@
   );
 </script>
 
-<div class="contour-container">
+<div bind:this={containerRef} class="contour-container">
   <!-- Canvas for heatmap (positioned absolutely) -->
   <canvas
     bind:this={canvasRef}
@@ -479,6 +504,7 @@
   .contour-container {
     position: relative;
     width: 100%;
+    aspect-ratio: 1 / 1;
     background: white;
     border: 1px solid #eee;
     border-radius: 4px;

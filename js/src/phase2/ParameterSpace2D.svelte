@@ -15,12 +15,35 @@
   // Hover state
   let hoveredStep = $state<number | null>(null);
 
-  // SVG dimensions (square for accurate 2D visualization)
-  const width = 800;
-  const height = 800;
+  // Container ref and reactive dimensions
+  let containerRef: HTMLDivElement | null = null;
+  let containerWidth = $state(800);
+  let containerHeight = $state(800);
+
+  const width = $derived(containerWidth);
+  const height = $derived(containerHeight);
   const padding = { left: 60, right: 40, top: 40, bottom: 60 };
-  const plotWidth = width - padding.left - padding.right;
-  const plotHeight = height - padding.top - padding.bottom;
+  const plotWidth = $derived(width - padding.left - padding.right);
+  const plotHeight = $derived(height - padding.top - padding.bottom);
+
+  // ResizeObserver to track container size changes
+  $effect(() => {
+    if (!containerRef) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width: w, height: h } = entry.contentRect;
+        containerWidth = w || 800;
+        containerHeight = h || 800;
+      }
+    });
+
+    resizeObserver.observe(containerRef);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  });
 
   // Use loss grid bounds as fixed axis ranges
   const w1Min = lossGrid.w1_min;
@@ -28,17 +51,16 @@
   const w2Min = lossGrid.w2_min;
   const w2Max = lossGrid.w2_max;
 
-  // Scaling functions
-  function scaleW1(w1: number): number {
-    return padding.left + ((w1 - w1Min) / (w1Max - w1Min)) * plotWidth;
-  }
+  // Reactive scaling functions
+  const scaleW1 = $derived.by(() => {
+    return (w1: number) =>
+      padding.left + ((w1 - w1Min) / (w1Max - w1Min)) * plotWidth;
+  });
 
-  function scaleW2(w2: number): number {
-    // Flip Y axis (w2 increases upward)
-    return (
-      height - padding.bottom - ((w2 - w2Min) / (w2Max - w2Min)) * plotHeight
-    );
-  }
+  const scaleW2 = $derived.by(() => {
+    return (w2: number) =>
+      height - padding.bottom - ((w2 - w2Min) / (w2Max - w2Min)) * plotHeight;
+  });
 
   // Animated current marker
   const markerX = tweened(0, { duration: 150, easing: cubicOut });
@@ -69,6 +91,7 @@
   );
 </script>
 
+<div bind:this={containerRef} class="plot-container">
 <svg viewBox="0 0 {width} {height}" width="100%" height="auto" class="plot-svg">
   <!-- Grid lines -->
   {#each w1Ticks as tick}
@@ -292,8 +315,15 @@
     <text x="12" y="44" font-size="12" fill="#334155">End</text>
   </g>
 </svg>
+</div>
 
 <style>
+  .plot-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
   .plot-svg {
     border: 1px solid #eee;
     border-radius: 4px;

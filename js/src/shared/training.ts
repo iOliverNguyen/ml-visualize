@@ -7,7 +7,7 @@
 
 export interface DataPoint {
   x: number;
-  yTrue: number;
+  y_true: number;  // Changed from yTrue to match Go JSON format
 }
 
 export interface TrainingConfig {
@@ -19,27 +19,27 @@ export interface TrainingConfig {
 
 export interface PointSnapshot {
   x: number;
-  yTrue: number;
-  yPred: number;
-  pointLoss: number; // (yPred - yTrue)^2
-  pointGrad: number; // 2 * (yPred - yTrue) * x
+  y_true: number;      // Changed from yTrue
+  y_pred: number;      // Changed from yPred
+  point_loss: number;  // Changed from pointLoss
+  point_grad: number;  // Changed from pointGrad
 }
 
 export interface UpdateDetails {
-  wOld: number;
+  w_old: number;    // Changed from wOld
   lr: number;
-  gradW: number;
-  deltaW: number; // -lr * gradW
-  wNew: number;
+  grad_w: number;   // Changed from gradW
+  delta_w: number;  // Changed from deltaW
+  w_new: number;    // Changed from wNew
 }
 
 export interface Snapshot {
   step: number;
   w: number;
-  gradW: number;
+  grad_w: number;                    // Changed from gradW
   loss: number;
-  pointDetails: PointSnapshot[];
-  updateComponents: UpdateDetails;
+  point_details: PointSnapshot[];    // Changed from pointDetails
+  update_components: UpdateDetails;  // Changed from updateComponents
 }
 
 export interface DataGenConfig {
@@ -65,8 +65,8 @@ function forward(w: number, x: number): number {
 /**
  * Compute loss for a single point: (y_pred - y_true)^2
  */
-function pointLoss(yPred: number, yTrue: number): number {
-  const diff = yPred - yTrue;
+function pointLoss(y_pred: number, y_true: number): number {
+  const diff = y_pred - y_true;
   return diff * diff;
 }
 
@@ -76,9 +76,9 @@ function pointLoss(yPred: number, yTrue: number): number {
  *   loss = (w*x - y_true)^2
  *   d(loss)/dw = 2 * (w*x - y_true) * x
  */
-function gradW(w: number, x: number, yTrue: number): number {
-  const yPred = forward(w, x);
-  return 2 * (yPred - yTrue) * x;
+function gradW(w: number, x: number, y_true: number): number {
+  const y_pred = forward(w, x);
+  return 2 * (y_pred - y_true) * x;
 }
 
 /**
@@ -87,8 +87,8 @@ function gradW(w: number, x: number, yTrue: number): number {
 function computeLoss(data: DataPoint[], weight: number): number {
   let totalLoss = 0;
   for (const point of data) {
-    const yPred = forward(weight, point.x);
-    totalLoss += pointLoss(yPred, point.yTrue);
+    const y_pred = forward(weight, point.x);
+    totalLoss += pointLoss(y_pred, point.y_true);
   }
   return totalLoss / data.length;
 }
@@ -99,7 +99,7 @@ function computeLoss(data: DataPoint[], weight: number): number {
 function computeGradient(data: DataPoint[], weight: number): number {
   let gradient = 0;
   for (const point of data) {
-    gradient += gradW(weight, point.x, point.yTrue);
+    gradient += gradW(weight, point.x, point.y_true);
   }
   return gradient / data.length;
 }
@@ -117,36 +117,36 @@ function createSnapshot(
   const gradient = computeGradient(data, weight);
 
   // Compute per-point details
-  const pointDetails: PointSnapshot[] = data.map(point => {
-    const yPred = forward(weight, point.x);
+  const point_details: PointSnapshot[] = data.map(point => {
+    const y_pred = forward(weight, point.x);
     return {
       x: point.x,
-      yTrue: point.yTrue,
-      yPred,
-      pointLoss: pointLoss(yPred, point.yTrue),
-      pointGrad: gradW(weight, point.x, point.yTrue)
+      y_true: point.y_true,
+      y_pred,
+      point_loss: pointLoss(y_pred, point.y_true),
+      point_grad: gradW(weight, point.x, point.y_true)
     };
   });
 
   // Compute update components
-  const deltaW = -config.learningRate * gradient;
-  const wNew = weight + deltaW;
+  const delta_w = -config.learningRate * gradient;
+  const w_new = weight + delta_w;
 
-  const updateComponents: UpdateDetails = {
-    wOld: weight,
+  const update_components: UpdateDetails = {
+    w_old: weight,
     lr: config.learningRate,
-    gradW: gradient,
-    deltaW,
-    wNew
+    grad_w: gradient,
+    delta_w,
+    w_new
   };
 
   return {
     step,
     w: weight,
-    gradW: gradient,
+    grad_w: gradient,
     loss,
-    pointDetails,
-    updateComponents
+    point_details,
+    update_components
   };
 }
 
@@ -164,7 +164,7 @@ export function trainModel(config: TrainingConfig): Snapshot[] {
     snapshots.push(snapshot);
 
     // Update weight using gradient descent
-    weight -= config.learningRate * snapshot.gradW;
+    weight -= config.learningRate * snapshot.grad_w;
   }
 
   return snapshots;
@@ -208,7 +208,7 @@ export function generateRandomData(config: DataGenConfig): DataPoint[] {
     const noise = (rng() * 2 - 1) * config.noiseLevel;
     const y = config.trueSlope * x + noise;
 
-    data.push({ x, yTrue: y });
+    data.push({ x, y_true: y });
   }
 
   return data;
@@ -239,8 +239,8 @@ export function validateDataset(data: DataPoint[]): string | null {
     if (!Number.isFinite(point.x)) {
       return `Point ${i} has invalid X value: ${point.x}`;
     }
-    if (!Number.isFinite(point.yTrue)) {
-      return `Point ${i} has invalid YTrue value: ${point.yTrue}`;
+    if (!Number.isFinite(point.y_true)) {
+      return `Point ${i} has invalid y_true value: ${point.y_true}`;
     }
   }
 
